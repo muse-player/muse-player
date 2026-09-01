@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { PlaybackControls } from "./components/playback-controls";
 import { ScoreRenderer } from "./components/score-renderer";
 import { useAutoScroll } from "./hooks/use-auto-scroll";
-import { useCursorHighlight } from "./hooks/use-cursor-highlight";
 import { usePlayback } from "./hooks/use-playback";
 import { useVerovio } from "./hooks/use-verovio";
 
@@ -47,7 +46,6 @@ export default function App() {
   } = usePlayback(midiBase64, timeMap, handleTimeUpdate);
 
   const { autoScrollEnabled } = useAutoScroll(containerRef, currentMeasure, playing);
-  useCursorHighlight(containerRef, getElementsAtTime, currentTime, playing);
 
   const [pageInput, setPageInput] = useState("1");
 
