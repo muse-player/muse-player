@@ -2,29 +2,33 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { PlaybackControls } from "./components/playback-controls";
 import { ScoreRenderer } from "./components/score-renderer";
 import { useAutoScroll } from "./hooks/use-auto-scroll";
+import { useNoteHighlight } from "./hooks/use-note-highlight";
 import { usePlayback } from "./hooks/use-playback";
 import { useVerovio } from "./hooks/use-verovio";
-
 import "./app.css";
 
 export default function App() {
   const containerRef = useRef<HTMLDivElement>(null);
   const {
-    ready,
-    loading,
-    svg,
     currentPage,
-    totalPages,
-    timeMap,
-    midiBase64,
-    loadScore,
-    renderPage,
+    getElementAttr,
     getElementsAtTime,
+    loading,
+    loadScore,
+    midiBase64,
+    ready,
+    renderPage,
+    svg,
+    timeMap,
+    totalPages,
   } = useVerovio();
+
+  const [activeNoteIds, setActiveNoteIds] = useState<string[]>([]);
 
   const handleTimeUpdate = useCallback(
     (time: number) => {
       const result = getElementsAtTime(time * 1000);
+      setActiveNoteIds(result.notes);
       if (result.page > 0) {
         renderPage(result.page);
       }
@@ -33,19 +37,25 @@ export default function App() {
   );
 
   const {
-    playing,
-    currentTime,
-    totalDuration,
     currentMeasure,
-    tempo,
-    play,
+    currentTime,
     pause,
-    stop,
+    play,
+    playing,
     seek,
+    stop,
+    tempo,
+    totalDuration,
     updateTempo,
   } = usePlayback(midiBase64, timeMap, handleTimeUpdate);
 
   const { autoScrollEnabled } = useAutoScroll(containerRef, currentMeasure, playing);
+
+  useNoteHighlight(
+    containerRef,
+    activeNoteIds,
+    getElementAttr,
+  );
 
   const [pageInput, setPageInput] = useState("1");
 

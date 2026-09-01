@@ -27,6 +27,7 @@ export function usePlayback(
   midiBase64: string,
   timeMap: TimeMapEntry[],
   onTimeUpdate?: (time: number) => void,
+  onNotesUpdate?: (noteIds: string[]) => void,
 ) {
   const [playing, setPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -78,8 +79,10 @@ export function usePlayback(
   // Refs for values needed by Part/Loop callbacks (avoid stale closures)
   const timeMapRef = useRef(timeMap);
   const onTimeUpdateRef = useRef(onTimeUpdate);
+  const onNotesUpdateRef = useRef(onNotesUpdate);
   useEffect(() => { timeMapRef.current = timeMap; }, [timeMap]);
   useEffect(() => { onTimeUpdateRef.current = onTimeUpdate; }, [onTimeUpdate]);
+  useEffect(() => { onNotesUpdateRef.current = onNotesUpdate; }, [onNotesUpdate]);
 
   const buildPartAndLoop = useCallback(() => {
     const Tone = toneRef.current;
@@ -105,6 +108,7 @@ export function usePlayback(
 
     // Create tracking loop (only once)
     if (!loopRef.current) {
+      const activeNotes = new Set<string>();
       const loop = new Tone.Loop(() => {
         const transport = Tone.getTransport();
         const now = transport.seconds;
@@ -114,8 +118,12 @@ export function usePlayback(
         if (tm.length > 0) {
           const ms = now * 1000;
           let measure = 0;
+          // Track active notes by processing timeMap entries up to current time
+          activeNotes.clear();
           for (let i = 0; i < tm.length; i++) {
             if (tm[i].tstamp <= ms) {
+              for (const id of (tm[i].on ?? [])) activeNotes.add(id);
+              for (const id of (tm[i].off ?? [])) activeNotes.delete(id);
               if (tm[i].on && tm[i].on!.length > 0) {
                 measure = i;
               }
@@ -124,6 +132,7 @@ export function usePlayback(
             }
           }
           setCurrentMeasure(measure);
+          onNotesUpdateRef.current?.([...activeNotes]);
         }
 
         onTimeUpdateRef.current?.(now);

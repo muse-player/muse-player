@@ -93,6 +93,11 @@ export function useVerovio() {
     return vrv.current.getPageWithElement(xmlId);
   }, []);
 
+  const getElementAttr = useCallback((xmlId: string): Record<string, string> => {
+    if (!vrv.current) return {};
+    return vrv.current.getElementAttr(xmlId);
+  }, []);
+
   return {
     ready,
     loading,
@@ -107,5 +112,6 @@ export function useVerovio() {
     getElementsAtTime,
     getTimeForElement,
     getPageWithElement,
+    getElementAttr,
   };
 }
