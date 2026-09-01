@@ -1,4 +1,5 @@
 import { defineConfig } from "@rsbuild/core";
+import { pluginNodePolyfill } from "@rsbuild/plugin-node-polyfill";
 import { pluginReact } from "@rsbuild/plugin-react";
 import { RsdoctorRspackPlugin } from "@rsdoctor/rspack-plugin";
 import tailwind from "@tailwindcss/postcss";
@@ -28,7 +29,12 @@ export default defineConfig({
   performance: {
     ...(isEnableRsdoctor && { buildCache: false }),
   },
-  plugins: [pluginReact()],
+  plugins: [pluginReact(), pluginNodePolyfill()],
+  source: {
+    define: {
+      global: "globalThis",
+    },
+  },
   tools: {
     postcss: {
       postcssOptions: {
