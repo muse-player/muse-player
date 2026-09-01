@@ -28,13 +28,16 @@ export default function App() {
   const handleTimeUpdate = useCallback(
     (time: number) => {
       const result = getElementsAtTime(time * 1000);
-      setActiveNoteIds(result.notes);
       if (result.page > 0) {
         renderPage(result.page);
       }
     },
     [getElementsAtTime, renderPage],
   );
+
+  const handleNotesUpdate = useCallback((noteIds: string[]) => {
+    setActiveNoteIds(noteIds);
+  }, []);
 
   const {
     currentMeasure,
@@ -47,7 +50,7 @@ export default function App() {
     tempo,
     totalDuration,
     updateTempo,
-  } = usePlayback(midiBase64, timeMap, handleTimeUpdate);
+  } = usePlayback(midiBase64, timeMap, handleTimeUpdate, handleNotesUpdate);
 
   const { autoScrollEnabled } = useAutoScroll(containerRef, currentMeasure, playing);
 

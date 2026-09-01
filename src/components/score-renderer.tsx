@@ -9,10 +9,9 @@ export function ScoreRenderer({ svg, containerRef }: ScoreRendererProps) {
       ref={containerRef}
       className="flex-1 overflow-y-auto overflow-x-hidden bg-white"
     >
-      <div
-        className="w-full flex justify-center py-4"
-        dangerouslySetInnerHTML={{ __html: svg }}
-      />
+      <div className="relative w-full flex justify-center py-4">
+        <div dangerouslySetInnerHTML={{ __html: svg }} />
+      </div>
     </div>
   );
 }

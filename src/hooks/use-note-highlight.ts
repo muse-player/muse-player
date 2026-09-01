@@ -5,20 +5,17 @@ const RIGHT_HAND_BG = "rgba(59, 130, 246, 0.25)";
 const LEFT_HAND_COLOR = "rgb(239, 68, 68)";
 const LEFT_HAND_BG = "rgba(239, 68, 68, 0.25)";
 
-interface HighlightRect {
-  noteId: string;
-  rect: SVGRectElement;
-}
+type Hand = "left" | "right";
 
 export function useNoteHighlight(
   containerReference: React.RefObject<HTMLDivElement | null>,
   activeNoteIds: string[],
   getElementAttribute: (xmlId: string) => Record<string, string>,
 ) {
-  const overlayReference = useRef<null | SVGGElement>(null);
-  const highlightsReference = useRef<Map<string, HighlightRect>>(new Map());
+  const overlayReference = useRef<HTMLDivElement | null>(null);
+  const handDivs = useRef<Map<Hand, HTMLDivElement>>(new Map());
 
-  const getOrCreateOverlay = useCallback((): null | SVGGElement => {
+  const getOrCreateOverlay = useCallback((): HTMLDivElement | null => {
     if (overlayReference.current?.isConnected)
       return overlayReference.current;
 
@@ -26,22 +23,28 @@ export function useNoteHighlight(
     if (!container)
       return null;
 
-    const svg = container.querySelector("svg");
-    if (!svg)
+    const relativeWrapper = container.firstElementChild as HTMLDivElement | null;
+    if (!relativeWrapper)
       return null;
 
-    let overlay = svg.querySelector("g.note-highlight-overlay") as SVGGElement;
+    let overlay = relativeWrapper.querySelector("div.note-highlight-overlay") as HTMLDivElement;
     if (!overlay) {
-      overlay = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      overlay = document.createElement("div");
       overlay.classList.add("note-highlight-overlay");
-      overlay.setAttribute("pointer-events", "none");
-      svg.append(overlay);
+      overlay.style.position = "absolute";
+      overlay.style.top = "0";
+      overlay.style.left = "0";
+      overlay.style.width = "100%";
+      overlay.style.height = "100%";
+      overlay.style.pointerEvents = "none";
+      overlay.style.overflow = "hidden";
+      relativeWrapper.append(overlay);
     }
     overlayReference.current = overlay;
     return overlay;
   }, [containerReference]);
 
-  const resolveHand = useCallback((noteId: string): "left" | "right" => {
+  const resolveHand = useCallback((noteId: string): Hand => {
     const attributes = getElementAttribute(noteId);
     if (attributes.staff) {
       return attributes.staff === "1" ? "right" : "left";
@@ -78,74 +81,63 @@ export function useNoteHighlight(
     if (!overlay)
       return;
 
-    const currentIds = new Set(activeNoteIds);
-    const existing = highlightsReference.current;
-
-    for (const [id, entry] of existing) {
-      if (currentIds.has(id))
-        continue;
-      entry.rect.remove();
-      existing.delete(id);
-    }
-
-    for (const id of currentIds) {
-      if (existing.has(id))
-        continue;
-
-      const element = document.querySelector(`#${id}`);
-      if (!element)
-        continue;
-
-      const noteRect = element.getBoundingClientRect();
-      const svg = overlay.ownerSVGElement;
-      if (!svg)
-        continue;
-
-      const svgRect = svg.getBoundingClientRect();
-      const hand = resolveHand(id);
-      const fillColor = hand === "right" ? RIGHT_HAND_BG : LEFT_HAND_BG;
-      const strokeColor = hand === "right" ? RIGHT_HAND_COLOR : LEFT_HAND_COLOR;
-
-      const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-      const padding = 2;
-      const vb = svg.viewBox.baseVal;
-      const scaleX = vb.width > 0 ? vb.width / svgRect.width : 1;
-      const scaleY = vb.height > 0 ? vb.height / svgRect.height : 1;
-
-      const x = (noteRect.left - svgRect.left - padding) * scaleX;
-      const y = (noteRect.top - svgRect.top - padding) * scaleY;
-      const w = (noteRect.width + padding * 2) * scaleX;
-      const h = (noteRect.height + padding * 2) * scaleY;
-
-      rect.setAttribute("x", String(x));
-      rect.setAttribute("y", String(y));
-      rect.setAttribute("width", String(w));
-      rect.setAttribute("height", String(h));
-      rect.setAttribute("rx", "4");
-      rect.setAttribute("fill", fillColor);
-      rect.setAttribute("stroke", strokeColor);
-      rect.setAttribute("stroke-width", "1.5");
-
-      overlay.append(rect);
-      existing.set(id, { noteId: id, rect });
-    }
-  }, [activeNoteIds, getOrCreateOverlay, resolveHand]);
-
-  useEffect(() => {
     const container = containerReference.current;
     if (!container)
       return;
 
-    const observer = new MutationObserver(() => {
-      overlayReference.current = null;
-      highlightsReference.current.clear();
-    });
-
-    const svgWrapper = container.querySelector("div");
-    if (svgWrapper) {
-      observer.observe(svgWrapper, { childList: true });
+    // Group note bounding rects by hand
+    const rectsByHand = new Map<Hand, DOMRect[]>();
+    for (const id of activeNoteIds) {
+      const element = document.querySelector(`#${id}`);
+      if (!element)
+        continue;
+      const hand = resolveHand(id);
+      let rects = rectsByHand.get(hand);
+      if (!rects) {
+        rects = [];
+        rectsByHand.set(hand, rects);
+      }
+      rects.push(element.getBoundingClientRect());
     }
 
-    return () => observer.disconnect();
-  }, [containerReference]);
+    const activeHands = new Set(rectsByHand.keys());
+    const existing = handDivs.current;
+
+    // Always clean up inactive hands
+    for (const [hand, div] of existing) {
+      if (activeHands.has(hand))
+        continue;
+      div.remove();
+      existing.delete(hand);
+    }
+
+    if (rectsByHand.size === 0)
+      return;
+
+    // Create or update one merged div per active hand
+    const containerRect = container.getBoundingClientRect();
+    const padding = 2;
+    for (const [hand, rects] of rectsByHand) {
+      const minX = Math.min(...rects.map(r => r.left));
+      const minY = Math.min(...rects.map(r => r.top));
+      const maxX = Math.max(...rects.map(r => r.right));
+      const maxY = Math.max(...rects.map(r => r.bottom));
+
+      let div = existing.get(hand);
+      if (!div) {
+        div = document.createElement("div");
+        div.style.position = "absolute";
+        div.style.borderRadius = "4px";
+        div.style.border = `1.5px solid ${hand === "right" ? RIGHT_HAND_COLOR : LEFT_HAND_COLOR}`;
+        div.style.backgroundColor = hand === "right" ? RIGHT_HAND_BG : LEFT_HAND_BG;
+        overlay.append(div);
+        existing.set(hand, div);
+      }
+
+      div.style.left = `${minX - containerRect.left + container.scrollLeft - padding}px`;
+      div.style.top = `${minY - containerRect.top + container.scrollTop - padding}px`;
+      div.style.width = `${maxX - minX + padding * 2}px`;
+      div.style.height = `${maxY - minY + padding * 2}px`;
+    }
+  }, [activeNoteIds, getOrCreateOverlay, resolveHand, containerReference]);
 }

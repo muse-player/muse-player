@@ -41,6 +41,7 @@ export function usePlayback(
   const partRef = useRef<any>(null);
   const loopRef = useRef<any>(null);
   const startedRef = useRef(false);
+  const lastNotifiedNotesRef = useRef<string[]>([]);
 
   // Parse MIDI when midiBase64 changes
   useEffect(() => {
@@ -132,7 +133,15 @@ export function usePlayback(
             }
           }
           setCurrentMeasure(measure);
-          onNotesUpdateRef.current?.([...activeNotes]);
+
+          // Only notify when NEW notes are added (not when notes end)
+          const notesArray = [...activeNotes];
+          const prev = lastNotifiedNotesRef.current;
+          const hasNewNotes = notesArray.some((id) => !prev.includes(id));
+          if (hasNewNotes) {
+            lastNotifiedNotesRef.current = notesArray;
+            onNotesUpdateRef.current?.(notesArray);
+          }
         }
 
         onTimeUpdateRef.current?.(now);
@@ -217,8 +226,11 @@ export function usePlayback(
   useEffect(() => {
     return () => {
       partRef.current?.dispose();
+      partRef.current = null;
       loopRef.current?.dispose();
+      loopRef.current = null;
       synthRef.current?.dispose();
+      synthRef.current = null;
       toneRef.current?.getTransport().stop();
     };
   }, []);
