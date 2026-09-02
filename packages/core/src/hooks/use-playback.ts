@@ -28,6 +28,7 @@ export function usePlayback(
   timeMap: TimeMapEntry[],
   onTimeUpdate?: (time: number) => void,
   onNotesUpdate?: (noteIds: string[]) => void,
+  instrument?: null | { reverb: any; sampler: any },
 ) {
   const [playing, setPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -172,11 +173,18 @@ export function usePlayback(
     await Tone.start();
     Tone.getTransport().bpm.value = tempo;
 
-    const synth = new Tone.PolySynth(Tone.Synth).toDestination();
-    synth.volume.value = -8;
-    synthReference.current = synth;
+    if (instrument?.sampler) {
+      // Use provided piano sampler
+      synthReference.current = instrument.sampler;
+    }
+    else {
+      // Fallback to basic synth if no sampler provided
+      const synth = new Tone.PolySynth(Tone.Synth).toDestination();
+      synth.volume.value = -8;
+      synthReference.current = synth;
+    }
     startedReference.current = true;
-  }, [tempo]);
+  }, [tempo, instrument]);
 
   // Rebuild Part when notes change AND audio is ready
   useEffect(() => {
