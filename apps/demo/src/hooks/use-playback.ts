@@ -1,26 +1,26 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-interface TimeMapEntry {
-  tstamp: number;
-  qstamp: number;
-  on?: string[];
-  off?: string[];
-  tempo?: number;
-}
-
 export interface NoteEvent {
-  time: number;
   duration: number;
-  pitch: string;
   midi: number;
+  pitch: string;
+  time: number;
 }
 
 export interface PlaybackState {
-  playing: boolean;
-  currentTime: number;
-  totalDuration: number;
   currentMeasure: number;
+  currentTime: number;
+  playing: boolean;
   tempo: number;
+  totalDuration: number;
+}
+
+interface TimeMapEntry {
+  off?: string[];
+  on?: string[];
+  qstamp: number;
+  tempo?: number;
+  tstamp: number;
 }
 
 export function usePlayback(
@@ -36,24 +36,26 @@ export function usePlayback(
   const [tempo, setTempo] = useState(120);
   const [notes, setNotes] = useState<NoteEvent[]>([]);
 
-  const toneRef = useRef<any>(null);
-  const synthRef = useRef<any>(null);
-  const partRef = useRef<any>(null);
-  const loopRef = useRef<any>(null);
-  const startedRef = useRef(false);
-  const lastNotifiedNotesRef = useRef<string[]>([]);
+  const toneReference = useRef<any>(null);
+  const synthReference = useRef<any>(null);
+  const partReference = useRef<any>(null);
+  const loopReference = useRef<any>(null);
+  const startedReference = useRef(false);
+  const lastNotifiedNotesReference = useRef<string[]>([]);
 
   // Parse MIDI when midiBase64 changes
   useEffect(() => {
-    if (!midiBase64) return;
+    if (!midiBase64)
+      return;
 
     (async () => {
       try {
         const { Midi } = await import("@tonejs/midi");
         const binary = atob(midiBase64);
         const bytes = new Uint8Array(binary.length);
-        for (let i = 0; i < binary.length; i++) {
-          bytes[i] = binary.charCodeAt(i);
+        for (let index = 0; index < binary.length; index++) {
+          // eslint-disable-next-line unicorn/prefer-code-point -- charCodeAt is correct for binary data (0-255)
+          bytes[index] = binary.charCodeAt(index);
         }
         const midi = new Midi(bytes.buffer);
 
@@ -61,120 +63,133 @@ export function usePlayback(
         for (const track of midi.tracks) {
           for (const note of track.notes) {
             allNotes.push({
-              time: note.time,
               duration: note.duration,
-              pitch: note.name,
               midi: note.midi,
+              pitch: note.name,
+              time: note.time,
             });
           }
         }
         allNotes.sort((a, b) => a.time - b.time);
         setNotes(allNotes);
         setTotalDuration(midi.duration);
-      } catch (e) {
-        console.error("[playback] Failed to parse MIDI:", e);
+      }
+      catch (error) {
+        console.error("[playback] Failed to parse MIDI:", error);
       }
     })();
   }, [midiBase64]);
 
   // Refs for values needed by Part/Loop callbacks (avoid stale closures)
-  const timeMapRef = useRef(timeMap);
-  const onTimeUpdateRef = useRef(onTimeUpdate);
-  const onNotesUpdateRef = useRef(onNotesUpdate);
-  useEffect(() => { timeMapRef.current = timeMap; }, [timeMap]);
-  useEffect(() => { onTimeUpdateRef.current = onTimeUpdate; }, [onTimeUpdate]);
-  useEffect(() => { onNotesUpdateRef.current = onNotesUpdate; }, [onNotesUpdate]);
+  const timeMapReference = useRef(timeMap);
+  const onTimeUpdateReference = useRef(onTimeUpdate);
+  const onNotesUpdateReference = useRef(onNotesUpdate);
+  useEffect(() => {
+    timeMapReference.current = timeMap;
+  }, [timeMap]);
+  useEffect(() => {
+    onTimeUpdateReference.current = onTimeUpdate;
+  }, [onTimeUpdate]);
+  useEffect(() => {
+    onNotesUpdateReference.current = onNotesUpdate;
+  }, [onNotesUpdate]);
 
   const buildPartAndLoop = useCallback(() => {
-    const Tone = toneRef.current;
-    if (!Tone) return;
+    const Tone = toneReference.current;
+    if (!Tone)
+      return;
 
     // Dispose previous Part if notes changed
-    if (partRef.current) {
-      partRef.current.dispose();
-      partRef.current = null;
+    if (partReference.current) {
+      partReference.current.dispose();
+      partReference.current = null;
     }
 
     if (notes.length > 0) {
       const part = new Tone.Part((time: number, note: NoteEvent) => {
-        synthRef.current?.triggerAttackRelease(
+        synthReference.current?.triggerAttackRelease(
           note.pitch,
           note.duration,
           time,
         );
-      }, notes.map((n) => [n.time, n] as [number, NoteEvent]));
+      }, notes.map(n => [n.time, n] as [number, NoteEvent]));
       part.start(0);
-      partRef.current = part;
+      partReference.current = part;
     }
 
     // Create tracking loop (only once)
-    if (!loopRef.current) {
+    if (!loopReference.current) {
       const activeNotes = new Set<string>();
       const loop = new Tone.Loop(() => {
         const transport = Tone.getTransport();
         const now = transport.seconds;
         setCurrentTime(now);
 
-        const tm = timeMapRef.current;
+        const tm = timeMapReference.current;
         if (tm.length > 0) {
           const ms = now * 1000;
           let measure = 0;
           // Track active notes by processing timeMap entries up to current time
           activeNotes.clear();
-          for (let i = 0; i < tm.length; i++) {
-            if (tm[i].tstamp <= ms) {
-              for (const id of (tm[i].on ?? [])) activeNotes.add(id);
-              for (const id of (tm[i].off ?? [])) activeNotes.delete(id);
-              if (tm[i].on && tm[i].on!.length > 0) {
-                measure = i;
-              }
-            } else {
+          for (const [index, element] of tm.entries()) {
+            if (element.tstamp > ms) {
               break;
+            }
+
+            const onIds = element.on ?? [];
+            const offIds = element.off ?? [];
+            for (const id of onIds) activeNotes.add(id);
+            for (const id of offIds) activeNotes.delete(id);
+            if (element.on && element.on!.length > 0) {
+              measure = index;
             }
           }
           setCurrentMeasure(measure);
 
           // Only notify when NEW notes are added (not when notes end)
           const notesArray = [...activeNotes];
-          const prev = lastNotifiedNotesRef.current;
-          const hasNewNotes = notesArray.some((id) => !prev.includes(id));
+          const previous = lastNotifiedNotesReference.current;
+          const hasNewNotes = notesArray.some(id => !previous.includes(id));
           if (hasNewNotes) {
-            lastNotifiedNotesRef.current = notesArray;
-            onNotesUpdateRef.current?.(notesArray);
+            lastNotifiedNotesReference.current = notesArray;
+            onNotesUpdateReference.current?.(notesArray);
           }
         }
 
-        onTimeUpdateRef.current?.(now);
+        onTimeUpdateReference.current?.(now);
       }, "16n");
       loop.start(0);
-      loopRef.current = loop;
+      loopReference.current = loop;
     }
   }, [notes]);
 
   const initAudio = useCallback(async () => {
-    if (startedRef.current) return;
+    if (startedReference.current)
+      return;
     const Tone = await import("tone");
-    toneRef.current = Tone;
+    toneReference.current = Tone;
 
     await Tone.start();
     Tone.getTransport().bpm.value = tempo;
 
     const synth = new Tone.PolySynth(Tone.Synth).toDestination();
     synth.volume.value = -8;
-    synthRef.current = synth;
-    startedRef.current = true;
+    synthReference.current = synth;
+    startedReference.current = true;
   }, [tempo]);
 
   // Rebuild Part when notes change AND audio is ready
   useEffect(() => {
-    if (!startedRef.current || notes.length === 0) return;
+    if (!startedReference.current || notes.length === 0)
+      return;
     buildPartAndLoop();
   }, [notes, buildPartAndLoop]);
 
   const play = useCallback(async () => {
     await initAudio();
-    const Tone = toneRef.current;
-    if (!Tone) return;
+    const Tone = toneReference.current;
+    if (!Tone)
+      return;
 
     // Build Part now that audio is ready (handles first-play case)
     buildPartAndLoop();
@@ -184,15 +199,17 @@ export function usePlayback(
   }, [initAudio, buildPartAndLoop]);
 
   const pause = useCallback(() => {
-    const Tone = toneRef.current;
-    if (!Tone) return;
+    const Tone = toneReference.current;
+    if (!Tone)
+      return;
     Tone.getTransport().pause();
     setPlaying(false);
   }, []);
 
   const stop = useCallback(() => {
-    const Tone = toneRef.current;
-    if (!Tone) return;
+    const Tone = toneReference.current;
+    if (!Tone)
+      return;
     Tone.getTransport().stop();
     Tone.getTransport().seconds = 0;
     setPlaying(false);
@@ -201,22 +218,25 @@ export function usePlayback(
   }, []);
 
   const seek = useCallback((timeInSeconds: number) => {
-    const Tone = toneRef.current;
-    if (!Tone) return;
+    const Tone = toneReference.current;
+    if (!Tone)
+      return;
     Tone.getTransport().seconds = timeInSeconds;
     setCurrentTime(timeInSeconds);
   }, []);
 
   const seekToMeasure = useCallback((measureIndex: number) => {
-    if (timeMap[measureIndex]) {
-      const time = timeMap[measureIndex].tstamp / 1000;
-      seek(time);
+    if (measureIndex < 0 || measureIndex >= timeMap.length) {
+      return;
     }
+
+    const time = timeMap[measureIndex].tstamp / 1000;
+    seek(time);
   }, [timeMap, seek]);
 
   const updateTempo = useCallback((newTempo: number) => {
     setTempo(newTempo);
-    const Tone = toneRef.current;
+    const Tone = toneReference.current;
     if (Tone) {
       Tone.getTransport().bpm.value = newTempo;
     }
@@ -225,27 +245,27 @@ export function usePlayback(
   // Cleanup
   useEffect(() => {
     return () => {
-      partRef.current?.dispose();
-      partRef.current = null;
-      loopRef.current?.dispose();
-      loopRef.current = null;
-      synthRef.current?.dispose();
-      synthRef.current = null;
-      toneRef.current?.getTransport().stop();
+      partReference.current?.dispose();
+      partReference.current = null;
+      loopReference.current?.dispose();
+      loopReference.current = null;
+      synthReference.current?.dispose();
+      synthReference.current = null;
+      toneReference.current?.getTransport().stop();
     };
   }, []);
 
   return {
-    playing,
-    currentTime,
-    totalDuration,
     currentMeasure,
-    tempo,
-    play,
+    currentTime,
     pause,
-    stop,
+    play,
+    playing,
     seek,
     seekToMeasure,
+    stop,
+    tempo,
+    totalDuration,
     updateTempo,
   };
 }

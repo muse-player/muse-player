@@ -1,62 +1,27 @@
 {
-  "name": "@trapar-waves/react-tailwind",
+  "name": "mxl-player",
   "type": "module",
-  "version": "2.0.0",
+  "version": "0.0.0",
+  "private": true,
   "packageManager": "pnpm@11.24.0",
-  "description": "A modern UI development template integrating React and Tailwind CSS, with Rsbuild, TypeScript, ESLint (Antfu config), and Iconify support.",
+  "description": "MXL/MusicXML score rendering and playback monorepo",
   "author": {
     "email": "admin@rikka.cc",
     "name": "Rikka",
     "url": "https://github.com/Muromi-Rikka"
   },
-  "homepage": "https://github.com/Trapar-waves/react-tailwind",
-  "licence": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Trapar-waves/react-tailwind.git"
-  },
-  "bugs": {
-    "url": "https://github.com/Trapar-waves/react-tailwind/issues"
-  },
-  "keywords": [
-    "react",
-    "tailwindcss",
-    "rsbuild",
-    "typescript",
-    "eslint",
-    "iconify"
-  ],
-  "publishConfig": {
-    "access": "public"
-  },
+  "license": "MIT",
   "scripts": {
-    "dev": "rsbuild dev --open",
-    "build": "rsbuild build",
-    "build:rsdoctor": "cross-env RSDOCTOR=true rsbuild build",
-    "preview": "rsbuild preview",
-    "lint": "eslint . --cache --max-warnings=0 --no-warn-ignored",
+    "dev": "pnpm -F demo dev",
+    "build": "pnpm -F @muse-player/core build && pnpm -F demo build",
+    "build:core": "pnpm -F @muse-player/core build",
+    "build:demo": "pnpm -F demo build",
+    "lint": "eslint . --cache --max-warnings=3 --no-warn-ignored",
     "postinstall": "husky"
-  },
-  "dependencies": {
-    "@tonejs/midi": "^2.0.28",
-    "@types/verovio": "^5.1.0",
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8",
-    "tone": "^15.1.22",
-    "verovio": "^6.3.0"
   },
   "devDependencies": {
     "@eslint-react/eslint-plugin": "^5.18.6",
-    "@iconify/json": "^2.2.522",
-    "@iconify/tailwind4": "^1.2.3",
     "@renton/eslint-config-react": "^1.0.0",
-    "@rsbuild/core": "^2.2.1",
-    "@rsbuild/plugin-node-polyfill": "^1.4.6",
-    "@rsbuild/plugin-react": "^2.1.0",
-    "@rsdoctor/rspack-plugin": "^1.6.3",
-    "@tailwindcss/postcss": "^4.3.3",
-    "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.5",
     "cross-env": "^10.1.0",
     "eslint": "^10.9.1",
     "eslint-plugin-format": "^2.0.1",
@@ -64,8 +29,6 @@
     "eslint-plugin-react-refresh": "^0.5.5",
     "husky": "^9.1.7",
     "lint-staged": "^17.4.1",
-    "tailwindcss": "^4.3.3",
-    "typescript": "^6.0.3",
-    "unplugin-turbo-console": "^2.3.3"
+    "typescript": "^6.0.3"
   }
 }

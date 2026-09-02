@@ -1,43 +1,38 @@
 import { useCallback, useRef } from "react";
 
-interface PlaybackControlsProps {
-  playing: boolean;
-  currentTime: number;
-  totalDuration: number;
+interface PlaybackControlsProperties {
   currentMeasure: number;
-  tempo: number;
-  onPlay: () => void;
+  currentTime: number;
   onPause: () => void;
-  onStop: () => void;
+  onPlay: () => void;
   onSeek: (time: number) => void;
+  onStop: () => void;
   onTempoChange: (tempo: number) => void;
-}
-
-function formatTime(seconds: number): string {
-  const m = Math.floor(seconds / 60);
-  const s = Math.floor(seconds % 60);
-  return `${m}:${s.toString().padStart(2, "0")}`;
+  playing: boolean;
+  tempo: number;
+  totalDuration: number;
 }
 
 export function PlaybackControls({
-  playing,
-  currentTime,
-  totalDuration,
   currentMeasure,
-  tempo,
-  onPlay,
+  currentTime,
   onPause,
-  onStop,
+  onPlay,
   onSeek,
+  onStop,
   onTempoChange,
-}: PlaybackControlsProps) {
-  const progressRef = useRef<HTMLDivElement>(null);
+  playing,
+  tempo,
+  totalDuration,
+}: PlaybackControlsProperties) {
+  const progressReference = useRef<HTMLDivElement>(null);
 
   const handleProgressClick = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      if (!progressRef.current || totalDuration <= 0) return;
-      const rect = progressRef.current.getBoundingClientRect();
-      const ratio = (e.clientX - rect.left) / rect.width;
+    (event: React.MouseEvent<HTMLDivElement>) => {
+      if (!progressReference.current || totalDuration <= 0)
+        return;
+      const rect = progressReference.current.getBoundingClientRect();
+      const ratio = (event.clientX - rect.left) / rect.width;
       onSeek(ratio * totalDuration);
     },
     [totalDuration, onSeek],
@@ -49,9 +44,9 @@ export function PlaybackControls({
     <div className="flex flex-col border-t border-slate-200 bg-white px-4 py-3 shadow-[0_-2px_8px_rgba(0,0,0,0.06)]">
       {/* Progress bar */}
       <div
-        ref={progressRef}
         className="group relative mb-3 h-1.5 w-full cursor-pointer rounded-full bg-slate-200"
         onClick={handleProgressClick}
+        ref={progressReference}
       >
         <div
           className="absolute left-0 top-0 h-full rounded-full bg-orange-500 transition-[width] duration-100"
@@ -68,8 +63,8 @@ export function PlaybackControls({
         <div className="flex items-center gap-3">
           {/* Play/Pause */}
           <button
-            onClick={playing ? onPause : onPlay}
             className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-500 text-white shadow-md transition hover:bg-orange-600 active:scale-95"
+            onClick={playing ? onPause : onPlay}
           >
             {playing
               ? (
@@ -86,8 +81,8 @@ export function PlaybackControls({
 
           {/* Stop */}
           <button
-            onClick={onStop}
             className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-300 text-slate-600 transition hover:bg-slate-100 active:scale-95"
+            onClick={onStop}
           >
             <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
               <path d="M6 6h12v12H6z" />
@@ -110,12 +105,12 @@ export function PlaybackControls({
         <div className="flex items-center gap-2">
           <span className="text-xs text-slate-500">BPM</span>
           <input
-            type="range"
-            min={40}
-            max={240}
-            value={tempo}
-            onChange={(e) => onTempoChange(Number(e.target.value))}
             className="h-1 w-20 accent-orange-500"
+            max={240}
+            min={40}
+            onChange={event => onTempoChange(Number(event.target.value))}
+            type="range"
+            value={tempo}
           />
           <span className="w-8 text-right text-xs font-mono text-slate-600">
             {tempo}
@@ -124,4 +119,10 @@ export function PlaybackControls({
       </div>
     </div>
   );
+}
+
+function formatTime(seconds: number): string {
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return `${m}:${s.toString().padStart(2, "0")}`;
 }

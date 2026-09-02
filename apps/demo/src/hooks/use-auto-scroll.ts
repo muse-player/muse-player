@@ -1,43 +1,48 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 export function useAutoScroll(
-  containerRef: React.RefObject<HTMLDivElement | null>,
+  containerReference: React.RefObject<HTMLDivElement | null>,
   currentMeasure: number,
-  playing: boolean,
+  isPlaying: boolean,
 ) {
   const [autoScrollEnabled, setAutoScrollEnabled] = useState(true);
-  const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const lastMeasureRef = useRef(-1);
+  const scrollTimeoutReference = useRef<null | ReturnType<typeof setTimeout>>(null);
+  const lastMeasureReference = useRef(-1);
 
   // Detect manual scroll and pause auto-scroll
   const handleScroll = useCallback(() => {
-    if (!playing) return;
+    if (!isPlaying)
+      return;
     setAutoScrollEnabled(false);
-    if (scrollTimeoutRef.current) {
-      clearTimeout(scrollTimeoutRef.current);
+    if (scrollTimeoutReference.current) {
+      clearTimeout(scrollTimeoutReference.current);
     }
-    scrollTimeoutRef.current = setTimeout(() => {
+    scrollTimeoutReference.current = setTimeout(() => {
       setAutoScrollEnabled(true);
     }, 5000);
-  }, [playing]);
+  }, [isPlaying]);
 
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+    const container = containerReference.current;
+    if (!container)
+      return;
     container.addEventListener("scroll", handleScroll, { passive: true });
     return () => {
       container.removeEventListener("scroll", handleScroll);
-      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+      if (scrollTimeoutReference.current)
+        clearTimeout(scrollTimeoutReference.current);
     };
-  }, [containerRef, handleScroll]);
+  }, [containerReference, handleScroll]);
 
   // Auto-scroll when measure changes
   useEffect(() => {
-    if (!playing || !autoScrollEnabled || currentMeasure === lastMeasureRef.current) return;
-    lastMeasureRef.current = currentMeasure;
+    if (!isPlaying || !autoScrollEnabled || currentMeasure === lastMeasureReference.current)
+      return;
+    lastMeasureReference.current = currentMeasure;
 
-    const container = containerRef.current;
-    if (!container) return;
+    const container = containerReference.current;
+    if (!container)
+      return;
 
     // Find SVG elements with measure data
     const measureElements = container.querySelectorAll(`[data-tstamp]`);
@@ -46,28 +51,28 @@ export function useAutoScroll(
       const progress = currentMeasure / Math.max(currentMeasure + 10, 1);
       const maxScroll = container.scrollHeight - container.clientHeight;
       container.scrollTo({
-        top: maxScroll * progress,
         behavior: "smooth",
+        top: maxScroll * progress,
       });
       return;
     }
 
     // Find the element closest to the current time position
-    const targetEl = measureElements[Math.min(currentMeasure, measureElements.length - 1)];
-    if (targetEl) {
-      targetEl.scrollIntoView({
+    const targetElement = measureElements[Math.min(currentMeasure, measureElements.length - 1)];
+    if (targetElement) {
+      targetElement.scrollIntoView({
         behavior: "smooth",
         block: "center",
       });
     }
-  }, [currentMeasure, playing, autoScrollEnabled, containerRef]);
+  }, [currentMeasure, isPlaying, autoScrollEnabled, containerReference]);
 
   // Re-enable auto-scroll when playback starts
   useEffect(() => {
-    if (playing) {
+    if (isPlaying) {
       setAutoScrollEnabled(true);
     }
-  }, [playing]);
+  }, [isPlaying]);
 
   return {
     autoScrollEnabled,

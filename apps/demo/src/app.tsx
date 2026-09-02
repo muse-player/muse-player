@@ -8,7 +8,7 @@ import { useVerovio } from "./hooks/use-verovio";
 import "./app.css";
 
 export default function App() {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerReference = useRef<HTMLDivElement>(null);
   const {
     currentPage,
     getElementAttr,
@@ -52,10 +52,10 @@ export default function App() {
     updateTempo,
   } = usePlayback(midiBase64, timeMap, handleTimeUpdate, handleNotesUpdate);
 
-  const { autoScrollEnabled } = useAutoScroll(containerRef, currentMeasure, playing);
+  const { autoScrollEnabled } = useAutoScroll(containerReference, currentMeasure, playing);
 
   useNoteHighlight(
-    containerRef,
+    containerReference,
     activeNoteIds,
     getElementAttr,
   );
@@ -73,7 +73,7 @@ export default function App() {
   }, [currentPage]);
 
   const handlePageSubmit = useCallback(() => {
-    const page = Number.parseInt(pageInput, 10);
+    const page = Number(pageInput);
     if (page >= 1 && page <= totalPages) {
       renderPage(page);
     }
@@ -91,28 +91,28 @@ export default function App() {
           {totalPages > 0 && (
             <div className="flex items-center gap-1.5 text-sm">
               <button
-                onClick={() => renderPage(currentPage - 1)}
-                disabled={currentPage <= 1}
                 className="rounded px-2 py-1 text-slate-600 hover:bg-slate-100 disabled:opacity-30"
+                disabled={currentPage <= 1}
+                onClick={() => renderPage(currentPage - 1)}
               >
                 &laquo;
               </button>
               <input
+                className="w-8 rounded border border-slate-300 bg-white text-center text-sm"
+                onBlur={handlePageSubmit}
+                onChange={event => setPageInput(event.target.value)}
+                onKeyDown={event => event.key === "Enter" && handlePageSubmit()}
                 type="text"
                 value={pageInput}
-                onChange={(e) => setPageInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handlePageSubmit()}
-                onBlur={handlePageSubmit}
-                className="w-8 rounded border border-slate-300 bg-white text-center text-sm"
               />
               <span className="text-slate-500">
                 /
                 {totalPages}
               </span>
               <button
-                onClick={() => renderPage(currentPage + 1)}
-                disabled={currentPage >= totalPages}
                 className="rounded px-2 py-1 text-slate-600 hover:bg-slate-100 disabled:opacity-30"
+                disabled={currentPage >= totalPages}
+                onClick={() => renderPage(currentPage + 1)}
               >
                 &raquo;
               </button>
@@ -140,20 +140,20 @@ export default function App() {
           </div>
         </div>
       )}
-      {svg && <ScoreRenderer svg={svg} containerRef={containerRef} />}
+      {svg && <ScoreRenderer containerRef={containerReference} svg={svg} />}
 
       {/* Playback controls */}
       <PlaybackControls
-        playing={playing}
-        currentTime={currentTime}
-        totalDuration={totalDuration}
         currentMeasure={currentMeasure}
-        tempo={tempo}
-        onPlay={play}
+        currentTime={currentTime}
         onPause={pause}
-        onStop={stop}
+        onPlay={play}
         onSeek={seek}
+        onStop={stop}
         onTempoChange={updateTempo}
+        playing={playing}
+        tempo={tempo}
+        totalDuration={totalDuration}
       />
     </div>
   );
