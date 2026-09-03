@@ -45,6 +45,7 @@
     }
   },
   "dependencies": {
+    "@muse-player/instruments": "workspace:*",
     "@tonejs/midi": "^2.0.28",
     "tone": "^15.1.22",
     "verovio": "^6.3.0"

@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@muse-player/core": "workspace:*",
+    "@muse-player/instruments": "workspace:*",
     "@tonejs/midi": "^2.0.28",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",

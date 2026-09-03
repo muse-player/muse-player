@@ -39,7 +39,9 @@ export default function App() {
     setActiveNoteIds(noteIds);
   }, []);
 
-  const { error: samplerError, loading: samplerLoading, ready: samplerReady, sampler } = usePianoSampler();
+  const { error: samplerError, loading: samplerLoading, ready: samplerReady, sampler } = usePianoSampler({
+    baseUrl: "/piano/",
+  });
 
   const {
     currentMeasure,

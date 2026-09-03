@@ -1,0 +1,29 @@
+{
+  "name": "@muse-player/instruments",
+  "type": "module",
+  "version": "0.1.0",
+  "description": "Local instrument samples for MXL Player",
+  "author": {
+    "email": "admin@rikka.cc",
+    "name": "Rikka",
+    "url": "https://github.com/Muromi-Rikka"
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "files": [
+    "samples",
+    "src",
+    "scripts"
+  ],
+  "scripts": {
+    "download:piano": "node --loader ts-node/esm scripts/download-piano.ts"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.0"
+  }
+}
