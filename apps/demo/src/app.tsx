@@ -39,7 +39,7 @@ export default function App() {
     setActiveNoteIds(noteIds);
   }, []);
 
-  const { loading: samplerLoading, ready: samplerReady, reverb, sampler } = usePianoSampler();
+  const { error: samplerError, loading: samplerLoading, ready: samplerReady, sampler } = usePianoSampler();
 
   const {
     currentMeasure,
@@ -52,7 +52,7 @@ export default function App() {
     tempo,
     totalDuration,
     updateTempo,
-  } = usePlayback(midiBase64, timeMap, handleTimeUpdate, handleNotesUpdate, samplerReady ? { reverb, sampler } : null);
+  } = usePlayback(midiBase64, timeMap, handleTimeUpdate, handleNotesUpdate, samplerReady ? { sampler } : null);
 
   const { autoScrollEnabled } = useAutoScroll(containerReference, currentMeasure, playing);
 
@@ -138,6 +138,14 @@ export default function App() {
       {samplerLoading && (
         <div className="flex flex-1 items-center justify-center">
           <div className="text-slate-500">Loading piano samples...</div>
+        </div>
+      )}
+      {samplerError && (
+        <div className="flex flex-1 items-center justify-center">
+          <div className="text-red-500">
+            Piano load failed:
+            {samplerError}
+          </div>
         </div>
       )}
       {!loading && !samplerLoading && !svg && (

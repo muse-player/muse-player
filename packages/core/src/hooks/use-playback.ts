@@ -28,7 +28,7 @@ export function usePlayback(
   timeMap: TimeMapEntry[],
   onTimeUpdate?: (time: number) => void,
   onNotesUpdate?: (noteIds: string[]) => void,
-  instrument?: null | { reverb: any; sampler: any },
+  instrument?: null | { sampler?: any },
 ) {
   const [playing, setPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -174,7 +174,7 @@ export function usePlayback(
     Tone.getTransport().bpm.value = tempo;
 
     if (instrument?.sampler) {
-      // Use provided piano sampler
+      // Use provided Tone.Sampler with real piano samples
       synthReference.current = instrument.sampler;
     }
     else {
