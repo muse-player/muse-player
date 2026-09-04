@@ -5,11 +5,11 @@ import createVerovioModule from "verovio/wasm";
 
 const VEROVIO_OPTIONS: VerovioOptions = {
   adjustPageHeight: true,
-  breaks: "encoded" as const,
+  breaks: "auto" as const,
   font: "Leipzig",
   footer: "none",
   header: "none",
-  pageWidth: 1200,
+  pageWidth: 1300,
   scale: 40,
 };
 
@@ -46,6 +46,7 @@ export function useVerovio() {
     try {
       const resp = await fetch(url);
       const buffer = await resp.arrayBuffer();
+      vrv.current.setOptions(VEROVIO_OPTIONS);
       const loaded = vrv.current.loadZipDataBuffer(buffer);
       if (!loaded) {
         console.error("Failed to load score");
