@@ -2,7 +2,7 @@
   "name": "@muse-player/instruments",
   "type": "module",
   "version": "0.1.0",
-  "description": "Local instrument samples for MXL Player",
+  "description": "Local instrument samples for Muse Player",
   "author": {
     "email": "admin@rikka.cc",
     "name": "Rikka",

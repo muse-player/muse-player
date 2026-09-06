@@ -88,7 +88,7 @@ export default function App() {
       {/* Header */}
       <header className="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-2 shadow-sm">
         <h1 className="text-base font-semibold text-slate-800">
-          MXL Player
+          Muse Player
         </h1>
         <div className="flex items-center gap-3">
           {/* Page navigation */}
