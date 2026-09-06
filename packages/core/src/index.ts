@@ -8,8 +8,9 @@ export { useNoteHighlight } from "./hooks/use-note-highlight";
 export { usePianoSampler } from "./hooks/use-piano-sampler";
 export type { PianoSamplerState, UsePianoSamplerOptions } from "./hooks/use-piano-sampler";
 export { usePlayback } from "./hooks/use-playback";
-// Types
 export type { NoteEvent, PlaybackState } from "./hooks/use-playback";
+export { useScore } from "./hooks/use-score";
+export type { ScoreData } from "./hooks/use-score";
 
-export { useVerovio } from "./hooks/use-verovio";
-export type { ScoreData } from "./hooks/use-verovio";
+// Shared types
+export type { ElementAttributes, ScoreRenderResult, TimeMapEntry } from "./types";

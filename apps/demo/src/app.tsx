@@ -1,10 +1,13 @@
-import { usePianoSampler, usePlayback } from "@muse-player/core";
+import {
+  PlaybackControls,
+  ScoreRenderer,
+  useAutoScroll,
+  useNoteHighlight,
+  usePianoSampler,
+  usePlayback,
+  useScore,
+} from "@muse-player/core";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { PlaybackControls } from "./components/playback-controls";
-import { ScoreRenderer } from "./components/score-renderer";
-import { useAutoScroll } from "./hooks/use-auto-scroll";
-import { useNoteHighlight } from "./hooks/use-note-highlight";
-import { useVerovio } from "./hooks/use-verovio";
 import "./app.css";
 
 export default function App() {
@@ -14,14 +17,13 @@ export default function App() {
     getElementAttr,
     getElementsAtTime,
     loading,
-    loadScore,
+    loadResult,
     midiBase64,
-    ready,
     renderPage,
     svg,
     timeMap,
     totalPages,
-  } = useVerovio();
+  } = useScore();
 
   const [activeNoteIds, setActiveNoteIds] = useState<string[]>([]);
 
@@ -67,10 +69,8 @@ export default function App() {
   const [pageInput, setPageInput] = useState("1");
 
   useEffect(() => {
-    if (ready) {
-      loadScore("/djb.mxl");
-    }
-  }, [ready, loadScore]);
+    loadResult("/djb.rendered.json");
+  }, [loadResult]);
 
   useEffect(() => {
     setPageInput(String(currentPage));
@@ -152,9 +152,7 @@ export default function App() {
       )}
       {!loading && !samplerLoading && !svg && (
         <div className="flex flex-1 items-center justify-center">
-          <div className="text-slate-400">
-            {ready ? "No score loaded" : "Initializing Verovio..."}
-          </div>
+          <div className="text-slate-400">No score loaded</div>
         </div>
       )}
       {svg && <ScoreRenderer containerRef={containerReference} svg={svg} />}

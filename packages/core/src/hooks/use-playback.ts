@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { TimeMapEntry } from "../types";
 
 export interface NoteEvent {
   duration: number;
@@ -13,14 +14,6 @@ export interface PlaybackState {
   playing: boolean;
   tempo: number;
   totalDuration: number;
-}
-
-interface TimeMapEntry {
-  off?: string[];
-  on?: string[];
-  qstamp: number;
-  tempo?: number;
-  tstamp: number;
 }
 
 export function usePlayback(

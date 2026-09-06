@@ -1,0 +1,33 @@
+{
+  "name": "@muse-player/cli",
+  "type": "module",
+  "version": "0.1.0",
+  "description": "CLI tool for pre-rendering MXL/MusicXML scores via @muse-player/server",
+  "author": {
+    "email": "admin@rikka.cc",
+    "name": "Rikka",
+    "url": "https://github.com/Muromi-Rikka"
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "bin": {
+    "muse-render": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "rslib build",
+    "dev": "rslib build --watch"
+  },
+  "dependencies": {
+    "@muse-player/server": "workspace:*"
+  },
+  "devDependencies": {
+    "@rslib/core": "^0.23.2",
+    "@types/node": "^24.3.0",
+    "typescript": "^6.0.3"
+  }
+}

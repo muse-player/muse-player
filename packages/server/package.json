@@ -1,0 +1,40 @@
+{
+  "name": "@muse-player/server",
+  "type": "module",
+  "version": "0.1.0",
+  "description": "Node.js library for server-side MXL/MusicXML score rendering via Verovio",
+  "author": {
+    "email": "admin@rikka.cc",
+    "name": "Rikka",
+    "url": "https://github.com/Muromi-Rikka"
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/src/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "rslib build",
+    "dev": "rslib build --watch"
+  },
+  "dependencies": {
+    "@muse-player/core": "workspace:*",
+    "verovio": "^6.3.0"
+  },
+  "devDependencies": {
+    "@rslib/core": "^0.23.2",
+    "@types/node": "^26.4.1",
+    "@types/verovio": "^5.1.0",
+    "typescript": "^6.0.3"
+  }
+}

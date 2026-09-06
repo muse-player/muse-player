@@ -47,15 +47,13 @@
   "dependencies": {
     "@muse-player/instruments": "workspace:*",
     "@tonejs/midi": "^2.0.28",
-    "tone": "^15.1.22",
-    "verovio": "^6.3.0"
+    "tone": "^15.1.22"
   },
   "devDependencies": {
     "@rsbuild/plugin-react": "^2.1.0",
     "@rslib/core": "^0.23.2",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.5",
-    "@types/verovio": "^5.1.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "typescript": "^6.0.3"

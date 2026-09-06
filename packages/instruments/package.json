@@ -16,8 +16,8 @@
   "types": "src/index.ts",
   "files": [
     "samples",
-    "src",
-    "scripts"
+    "scripts",
+    "src"
   ],
   "scripts": {
     "download:piano": "node --loader ts-node/esm scripts/download-piano.ts"
