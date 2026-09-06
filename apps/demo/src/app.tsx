@@ -69,7 +69,7 @@ export default function App() {
   const [pageInput, setPageInput] = useState("1");
 
   useEffect(() => {
-    loadResult("/djb.rendered.json");
+    loadResult("/djb.rendered/manifest.json");
   }, [loadResult]);
 
   useEffect(() => {

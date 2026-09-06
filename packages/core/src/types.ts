@@ -2,6 +2,18 @@ export interface ElementAttributes {
   [xmlId: string]: Record<string, string>;
 }
 
+export interface ScoreDataFile {
+  elementAttributes: ElementAttributes;
+  midiBase64: string;
+  timemap: TimeMapEntry[];
+}
+
+export interface ScoreManifest {
+  data: string;
+  pages: string[];
+  scoreData: { title: string; totalPages: number };
+}
+
 export interface ScoreRenderResult {
   elementAttributes: ElementAttributes;
   midiBase64: string;

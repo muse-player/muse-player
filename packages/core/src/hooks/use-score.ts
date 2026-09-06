@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import type { ScoreRenderResult } from "../types";
+import type { ScoreDataFile, ScoreManifest } from "../types";
 
 export interface ScoreData {
   title: string;
@@ -16,8 +16,8 @@ export function useScore() {
   const [currentPage, setCurrentPage] = useState(1);
   const [scoreData, setScoreData] = useState<null | ScoreData>(null);
   const [midiBase64, setMidiBase64] = useState("");
-  const [timeMap, setTimeMap] = useState<ScoreRenderResult["timemap"]>([]);
-  const [elementAttributes, setElementAttributes] = useState<ScoreRenderResult["elementAttributes"]>({});
+  const [timeMap, setTimeMap] = useState<ScoreDataFile["timemap"]>([]);
+  const [elementAttributes, setElementAttributes] = useState<ScoreDataFile["elementAttributes"]>({});
   const [pageForElementMap, setPageForElementMap] = useState<Map<string, number>>(new Map());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<null | string>(null);
@@ -26,26 +26,40 @@ export function useScore() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch: ${response.status}`);
+      const manifestResponse = await fetch(url);
+      if (!manifestResponse.ok) {
+        throw new Error(`Failed to fetch manifest: ${manifestResponse.status}`);
       }
-      const result: ScoreRenderResult = await response.json();
+      const manifest: ScoreManifest = await manifestResponse.json();
 
-      const pageMap = new Map<string, number>();
-      for (const [index, svg] of result.svgPages.entries()) {
-        const parser = new DOMParser();
-        const document_ = parser.parseFromString(svg, "image/svg+xml");
-        for (const element of document_.querySelectorAll("[id]")) {
-          pageMap.set(element.id, index + 1);
+      const dataUrl = resolveRelative(url, manifest.data);
+      const pageUrls = manifest.pages.map(p => resolveRelative(url, p));
+
+      const [dataResponse, ...pageResponses] = await Promise.all([
+        fetch(dataUrl),
+        ...pageUrls.map(u => fetch(u)),
+      ]);
+
+      if (!dataResponse.ok) {
+        throw new Error(`Failed to fetch data: ${dataResponse.status}`);
+      }
+      const data: ScoreDataFile = await dataResponse.json();
+
+      const pages: string[] = [];
+      for (const response of pageResponses) {
+        if (!response.ok) {
+          throw new Error(`Failed to fetch page: ${response.status}`);
         }
+        pages.push(await response.text());
       }
 
-      setSvgPages(result.svgPages);
-      setScoreData(result.scoreData);
-      setMidiBase64(result.midiBase64);
-      setTimeMap(result.timemap);
-      setElementAttributes(result.elementAttributes);
+      const pageMap = buildPageMap(pages);
+
+      setSvgPages(pages);
+      setScoreData(manifest.scoreData);
+      setMidiBase64(data.midiBase64);
+      setTimeMap(data.timemap);
+      setElementAttributes(data.elementAttributes);
       setPageForElementMap(pageMap);
       setCurrentPage(1);
     }
@@ -131,4 +145,21 @@ export function useScore() {
     timeMap,
     totalPages,
   };
+}
+
+function buildPageMap(pages: string[]): Map<string, number> {
+  const pageMap = new Map<string, number>();
+  for (const [index, svg] of pages.entries()) {
+    const parser = new DOMParser();
+    const document_ = parser.parseFromString(svg, "image/svg+xml");
+    for (const element of document_.querySelectorAll("[id]")) {
+      pageMap.set(element.id, index + 1);
+    }
+  }
+  return pageMap;
+}
+
+function resolveRelative(baseUrl: string, relativePath: string): string {
+  const base = baseUrl.slice(0, Math.max(0, baseUrl.lastIndexOf("/") + 1));
+  return base + relativePath;
 }

@@ -13,4 +13,4 @@ export { useScore } from "./hooks/use-score";
 export type { ScoreData } from "./hooks/use-score";
 
 // Shared types
-export type { ElementAttributes, ScoreRenderResult, TimeMapEntry } from "./types";
+export type { ElementAttributes, ScoreDataFile, ScoreManifest, ScoreRenderResult, TimeMapEntry } from "./types";
