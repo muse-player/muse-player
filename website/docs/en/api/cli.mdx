@@ -1,0 +1,74 @@
+---
+description: API reference for @muse-player/cli — muse-render command for pre-rendering MXL files.
+---
+
+# @muse-player/cli
+
+CLI tool for pre-rendering MXL/MusicXML scores to static asset directories. This is a convenience wrapper around `@muse-player/server` — MXL files **must** be pre-rendered before they can be consumed by `@muse-player/core` hooks.
+
+```bash
+# Use directly
+npx muse-render score.mxl -o public/score
+
+# Or install as a dev dependency
+pnpm add -D @muse-player/cli
+```
+
+---
+
+## muse-render
+
+```
+Usage: muse-render <input.mxl> [options]
+
+Options:
+  -o, --output <dir>    Output directory (default: <input-name>.rendered/)
+  --pageWidth <number>  Page width in SVG units (default: 1300)
+  --scale <number>      Scale factor (default: 40)
+  -h, --help            Show this help
+```
+
+### Examples
+
+```bash
+# Basic usage — outputs to score.rendered/
+muse-render score.mxl
+
+# Custom output directory
+muse-render score.mxl -o public/scores/my-score
+
+# Adjust rendering dimensions
+muse-render score.mxl --pageWidth 1600 --scale 50
+```
+
+### Output Structure
+
+```
+<name>.rendered/
+  manifest.json     # Score metadata — feed this URL to useScore().loadResult()
+  data.json         # MIDI data, timemap, element attributes
+  page-1.svg        # SVG pages of the rendered score
+  page-2.svg
+  ...
+```
+
+### manifest.json
+
+```json
+{
+  "data": "data.json",
+  "pages": ["page-1.svg", "page-2.svg"],
+  "scoreData": { "title": "score", "totalPages": 2 }
+}
+```
+
+The `title` field is set to the input filename without the `.mxl` extension.
+
+### Integration
+
+Pre-rendered assets are served as static files and loaded by `useScore`:
+
+```ts
+const { loadResult } = useScore();
+loadResult('/scores/my-score/manifest.json');
+```

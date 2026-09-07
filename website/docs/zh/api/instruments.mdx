@@ -1,0 +1,82 @@
+---
+description: "@muse-player/instruments API 参考 —— 钢琴采样清单和 URL 解析。"
+---
+
+# @muse-player/instruments
+
+钢琴采样清单和 URL 解析，用于逼真的音频回放。
+
+```bash
+pnpm add @muse-player/instruments
+```
+
+---
+
+## getPianoSampleUrls
+
+返回音符名称到完整 MP3 URL 的映射，覆盖全部 84 个钢琴采样（C1 至 B7）。
+
+```ts
+import { getPianoSampleUrls } from '@muse-player/instruments';
+
+// 默认 CDN
+const urls = getPianoSampleUrls();
+// { "C1": "https://nbrosowsky.github.io/.../C1.mp3", "C#1": "...", ... }
+
+// 自托管
+const urls = getPianoSampleUrls('/samples/piano/');
+// { "C1": "/samples/piano/C1.mp3", ... }
+```
+
+### 签名
+
+```ts
+function getPianoSampleUrls(baseUrl?: string): Record<string, string>
+```
+
+| 参数 | 类型 | 默认值 | 描述 |
+|------|------|--------|------|
+| `baseUrl` | `string` | `PIANO_CDN_URL` | MP3 文件所在的基础 URL |
+
+**返回值：** `Record<string, string>`，映射音符名称（如 `"C4"`、`"F#5"`）到完整 URL。
+
+---
+
+## PIANO_CDN_URL
+
+```ts
+const PIANO_CDN_URL = 'https://nbrosowsky.github.io/tonejs-instruments/samples/piano/';
+```
+
+钢琴采样的默认 CDN URL。当未提供自定义 `baseUrl` 时，`usePianoSampler` 使用此值。
+
+---
+
+## PIANO_MANIFEST
+
+```ts
+const PIANO_MANIFEST: Record<string, string>;
+```
+
+映射音符名称到相对 MP3 文件名。覆盖 C1 到 B7 共 84 个音符（所有自然音和升号音）。
+
+```ts
+{
+  "C1": "C1.mp3",
+  "C#1": "Cs1.mp3",
+  "D1": "D1.mp3",
+  // ...
+  "B7": "B7.mp3"
+}
+```
+
+### 自托管钢琴采样
+
+要自行托管采样文件，请下载 MP3 文件并传入你的基础 URL：
+
+```ts
+// usePianoSampler 内部使用 getPianoSampleUrls
+const { sampler } = usePianoSampler({ baseUrl: '/my-piano-samples/' });
+```
+
+确保你的服务器在预期路径上提供 MP3 文件（如 `/my-piano-samples/C4.mp3`）。

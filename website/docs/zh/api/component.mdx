@@ -1,0 +1,68 @@
+---
+description: "@muse-player/component API 参考 —— PlaybackControls UI 组件，使用 StyleX 样式化。"
+---
+
+# @muse-player/component
+
+Muse Player 的预构建 UI 组件，使用 [StyleX](https://stylexjs.com/) 样式化。
+
+```bash
+pnpm add @muse-player/component
+```
+
+:::warning
+必须导入样式表才能使组件样式生效：
+
+```ts
+import '@muse-player/component/style.css';
+```
+:::
+
+---
+
+## PlaybackControls
+
+完整的播放控制栏，包含进度跳转、播放/暂停/停止、时间显示和速度滑块。
+
+```tsx
+import { PlaybackControls } from '@muse-player/component';
+import '@muse-player/component/style.css';
+
+<PlaybackControls
+  playing={playing}
+  currentTime={currentTime}
+  totalDuration={totalDuration}
+  currentMeasure={currentMeasure}
+  tempo={tempo}
+  onPlay={play}
+  onPause={pause}
+  onStop={stop}
+  onSeek={seek}
+  onTempoChange={updateTempo}
+/>
+```
+
+### Props
+
+所有 props 均为必填。
+
+| Prop | 类型 | 描述 |
+|------|------|------|
+| `playing` | `boolean` | 音频是否正在播放 |
+| `currentTime` | `number` | 当前播放时间（秒） |
+| `totalDuration` | `number` | 总时长（秒） |
+| `currentMeasure` | `number` | 当前小节索引（从 0 开始，显示时 +1） |
+| `tempo` | `number` | 当前 BPM |
+| `onPlay` | `() => void` | 播放按钮处理器 |
+| `onPause` | `() => void` | 暂停按钮处理器 |
+| `onStop` | `() => void` | 停止按钮处理器 |
+| `onSeek` | `(time: number) => void` | 跳转处理器 —— 接收时间（秒） |
+| `onTempoChange` | `(tempo: number) => void` | 速度变更处理器 —— 接收新的 BPM |
+
+### UI 功能
+
+- **进度条** —— 可点击的轨道，带有填充指示器。点击位置转换为时间比例。
+- **播放/暂停按钮** —— 圆形橙色按钮，在播放和暂停状态间切换图标。
+- **停止按钮** —— 带边框的圆形停止图标。
+- **时间显示** —— 等宽字体 `M:SS / M:SS` 格式，加当前小节编号。
+- **速度滑块** —— 40 到 240 BPM 的范围输入，显示当前值。

@@ -1,0 +1,261 @@
+---
+description: API reference for @muse-player/core — React hooks for score loading, MIDI playback, note highlighting, and auto-scrolling.
+---
+
+# @muse-player/core
+
+Core React hooks and components for MXL/MusicXML score rendering and playback.
+
+```bash
+pnpm add @muse-player/core
+```
+
+**Peer dependencies:** `react >=18`, `react-dom >=18`
+
+:::warning
+This package does **not** include Verovio or any MXL parsing capability. It only consumes pre-rendered static artifacts (manifest.json, data.json, SVG pages) produced by `@muse-player/server` or the `muse-render` CLI. You **must** pre-render your MXL files before using these hooks.
+:::
+
+---
+
+## Hooks
+
+### useScore
+
+Loads pre-rendered score data from a manifest URL. The URL **must** point to a `manifest.json` produced by `@muse-player/server` or `muse-render`. There is no way to load raw MXL/MusicXML files through this hook.
+
+```ts
+function useScore(): ScoreState
+```
+
+**Parameters:** None
+
+**Returns:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `loadResult` | `(url: string) => Promise<void>` | Fetches manifest at `url`, loads all pages and data |
+| `loading` | `boolean` | `true` while fetch is in progress |
+| `error` | `string \| null` | Error message if load failed |
+| `svg` | `string` | SVG markup for the current page |
+| `currentPage` | `number` | Currently active page (1-indexed) |
+| `totalPages` | `number` | Total number of SVG pages |
+| `renderPage` | `(page: number) => void` | Switch to a different page (1-indexed) |
+| `midiBase64` | `string` | Base64-encoded MIDI data for playback |
+| `timeMap` | `TimeMapEntry[]` | Time-indexed note events |
+| `scoreData` | `ScoreData \| null` | `{ title, totalPages }` from the manifest |
+| `getElementsAtTime` | `(ms: number) => { notes: string[]; page: number }` | Active note IDs and page at a millisecond timestamp |
+| `getElementAttr` | `(xmlId: string) => Record<string, string>` | Verovio attributes for a note element |
+| `getPageWithElement` | `(xmlId: string) => number` | Page number containing the element (1-indexed, 0 if not found) |
+| `getTimeForElement` | `(xmlId: string) => number` | Time in seconds when a note first appears in the timemap |
+
+---
+
+### usePlayback
+
+Full MIDI playback engine. Parses base64 MIDI, schedules notes via Tone.js, tracks time and measure, and supports real-time tempo changes.
+
+```ts
+function usePlayback(
+  midiBase64: string,
+  timeMap: TimeMapEntry[],
+  onTimeUpdate?: (time: number) => void,
+  onNotesUpdate?: (noteIds: string[]) => void,
+  instrument?: { sampler: any } | null,
+): PlaybackControls
+```
+
+**Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `midiBase64` | `string` | Base64-encoded MIDI data from `useScore` |
+| `timeMap` | `TimeMapEntry[]` | Timemap from `useScore` |
+| `onTimeUpdate` | `(time: number) => void` | Called on each 16th-note tick with current time in seconds. Use to drive page changes via `getElementsAtTime`. |
+| `onNotesUpdate` | `(noteIds: string[]) => void` | Called when new notes are activated. Receives array of active XML note IDs. |
+| `instrument` | `{ sampler: any } \| null` | Tone.Sampler instance from `usePianoSampler`. If null, falls back to a basic PolySynth. |
+
+**Returns:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `play` | `() => Promise<void>` | Starts audio context and playback |
+| `pause` | `() => void` | Pauses (preserves position) |
+| `stop` | `() => void` | Stops and resets to beginning |
+| `seek` | `(seconds: number) => void` | Jumps to absolute time |
+| `seekToMeasure` | `(index: number) => void` | Jumps to a measure by timemap index |
+| `playing` | `boolean` | Whether playback is active |
+| `currentTime` | `number` | Current position in seconds |
+| `totalDuration` | `number` | Total MIDI duration in seconds |
+| `currentMeasure` | `number` | Current measure index (0-indexed) |
+| `tempo` | `number` | Current BPM (default: 120) |
+| `updateTempo` | `(bpm: number) => void` | Changes BPM in real-time |
+
+:::warning
+The first `play()` call triggers `Tone.start()` which is required by browser audio policy. This must be called from a user gesture handler.
+:::
+
+---
+
+### usePianoSampler
+
+Loads realistic piano samples via Tone.Sampler with a compressor and reverb effects chain.
+
+```ts
+function usePianoSampler(options?: UsePianoSamplerOptions): PianoSamplerState
+```
+
+**Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `options.baseUrl` | `string` | Base URL for piano sample MP3 files. Default: CDN at `nbrosowsky.github.io/tonejs-instruments/samples/piano/` |
+
+**Returns:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `loading` | `boolean` | `true` while samples are downloading |
+| `ready` | `boolean` | `true` when sampler is ready to play |
+| `error` | `string \| null` | Error message if loading failed |
+| `sampler` | `Tone.Sampler \| null` | Pass to `usePlayback` as `{ sampler }` |
+
+The audio chain is: **Sampler -> Compressor -> Reverb -> Destination**
+
+---
+
+### useAutoScroll
+
+Automatically scrolls the score container during playback to keep the current measure visible.
+
+```ts
+function useAutoScroll(
+  containerRef: React.RefObject<HTMLDivElement | null>,
+  currentMeasure: number,
+  isPlaying: boolean,
+): AutoScrollState
+```
+
+**Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `containerRef` | `RefObject<HTMLDivElement>` | Ref to the scrollable score container |
+| `currentMeasure` | `number` | Current measure from `usePlayback` |
+| `isPlaying` | `boolean` | Whether playback is active |
+
+**Returns:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `autoScrollEnabled` | `boolean` | Whether auto-scroll is active |
+| `setAutoScrollEnabled` | `(enabled: boolean) => void` | Manually toggle auto-scroll |
+
+Manual scrolling disables auto-scroll for 5 seconds. It re-enables immediately when playback starts.
+
+---
+
+### useNoteHighlight
+
+Draws colored overlay rectangles around actively playing notes on the score. Blue for right hand (staff 1), red for left hand (staff 2).
+
+```ts
+function useNoteHighlight(
+  containerRef: React.RefObject<HTMLDivElement | null>,
+  activeNoteIds: string[],
+  getElementAttribute: (xmlId: string) => Record<string, string>,
+): void
+```
+
+**Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `containerRef` | `RefObject<HTMLDivElement>` | Ref to the score container |
+| `activeNoteIds` | `string[]` | Active note IDs from `usePlayback`'s `onNotesUpdate` |
+| `getElementAttribute` | `(xmlId: string) => Record<string, string>` | From `useScore`'s `getElementAttr` |
+
+This hook is purely side-effectful — it returns nothing.
+
+---
+
+## Component
+
+### ScoreRenderer
+
+Renders a single SVG page inside a scrollable container.
+
+```tsx
+<ScoreRenderer containerRef={containerRef} svg={svg} />
+```
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `containerRef` | `RefObject<HTMLDivElement>` | Ref to the outer scrollable div (used by `useAutoScroll` and `useNoteHighlight`) |
+| `svg` | `string` | Raw SVG markup string to render |
+
+---
+
+## Types
+
+### TimeMapEntry
+
+```ts
+interface TimeMapEntry {
+  off?: string[];       // XML IDs of notes ending at this time
+  on?: string[];        // XML IDs of notes starting at this time
+  qstamp: number;       // Quarter-note stamp (position in score)
+  tempo?: number;       // Tempo at this entry (BPM)
+  tstamp: number;       // Absolute timestamp in milliseconds
+}
+```
+
+### ScoreData
+
+```ts
+interface ScoreData {
+  title: string;
+  totalPages: number;
+}
+```
+
+### ScoreManifest
+
+```ts
+interface ScoreManifest {
+  data: string;          // Relative path to data.json
+  pages: string[];       // Relative paths to SVG page files
+  scoreData: { title: string; totalPages: number };
+}
+```
+
+### ScoreRenderResult
+
+```ts
+interface ScoreRenderResult {
+  elementAttributes: ElementAttributes;
+  midiBase64: string;
+  scoreData: { title: string; totalPages: number };
+  svgPages: string[];
+  timemap: TimeMapEntry[];
+}
+```
+
+### ElementAttributes
+
+```ts
+interface ElementAttributes {
+  [xmlId: string]: Record<string, string>;
+}
+```
+
+### NoteEvent
+
+```ts
+interface NoteEvent {
+  duration: number;  // Note duration in seconds
+  midi: number;      // MIDI note number (0-127)
+  pitch: string;     // Note name (e.g., "C4", "F#5")
+  time: number;      // Start time in seconds
+}
+```

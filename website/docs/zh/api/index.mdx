@@ -1,0 +1,37 @@
+---
+title: API 概览
+description: 所有 Muse Player 包及其公开 API 的概览。
+overview: true
+---
+
+Muse Player 以 monorepo 形式组织，包含五个包，各司其职。
+
+## 包列表
+
+### [@muse-player/core](/api/core)
+
+核心 React Hooks 和 `ScoreRenderer` 组件。这是将 Muse Player 集成到 React 应用中的主要包。
+
+**导出：** `useScore`、`usePlayback`、`usePianoSampler`、`useAutoScroll`、`useNoteHighlight`、`ScoreRenderer`
+
+### [@muse-player/component](/api/component)
+
+预构建的播放控制 UI 组件，使用 StyleX 样式化。
+
+**导出：** `PlaybackControls`
+
+### [@muse-player/server](/api/server)
+
+Node.js 库，通过 Verovio WASM 进行服务端 MXL/MusicXML 渲染。将 MXL 文件转换为 SVG 页面、MIDI 数据和时间映射。
+
+**导出：** `renderScore`
+
+### [@muse-player/cli](/api/cli)
+
+CLI 工具（`muse-render`），用于将 MXL 文件预渲染为静态资源目录。
+
+### [@muse-player/instruments](/api/instruments)
+
+钢琴采样清单和 URL 解析，用于逼真的音频回放。
+
+**导出：** `getPianoSampleUrls`、`PIANO_MANIFEST`、`PIANO_CDN_URL`

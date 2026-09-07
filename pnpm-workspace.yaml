@@ -1,6 +1,7 @@
 packages:
   - "packages/*"
   - "apps/*"
+  - "website"
 
 minimumReleaseAge: 0
 

@@ -1,0 +1,99 @@
+---
+description: "@muse-player/server API 参考 —— Node.js MXL 渲染，基于 Verovio WASM。"
+---
+
+# @muse-player/server
+
+Node.js 库，通过 [Verovio](https://www.verovio.org/) WASM 进行服务端 MXL/MusicXML 乐谱渲染。这是处理 MXL 文件的**必需**入口 —— `@muse-player/core` 无法直接解析 MXL 文件，仅消费此包的输出。
+
+```bash
+pnpm add @muse-player/server
+```
+
+---
+
+## renderScore
+
+将 MXL（压缩 MusicXML）文件转换为 SVG 页面、MIDI 数据、时间映射和元素属性。
+
+```ts
+import { renderScore } from '@muse-player/server';
+import { readFileSync } from 'node:fs';
+
+const buffer = readFileSync('score.mxl');
+const result = await renderScore(buffer);
+```
+
+### 签名
+
+```ts
+async function renderScore(
+  mxlBuffer: ArrayBuffer | Buffer,
+  options?: RenderOptions,
+): Promise<ScoreRenderResult>
+```
+
+### 参数
+
+| 参数 | 类型 | 描述 |
+|------|------|------|
+| `mxlBuffer` | `ArrayBuffer \| Buffer` | MXL 文件的原始字节 |
+| `options` | `RenderOptions` | Verovio 渲染选项（可选） |
+
+### 默认选项
+
+```ts
+{
+  adjustPageHeight: true,
+  breaks: 'auto',
+  font: 'Leipzig',
+  footer: 'none',
+  header: 'none',
+  pageWidth: 1300,
+  scale: 40,
+}
+```
+
+`RenderOptions` 继承自 Verovio 的原生选项。完整列表请参阅 [Verovio 文档](https://www.verovio.org/)。
+
+### 返回值
+
+```ts
+interface ScoreRenderResult {
+  elementAttributes: Record<string, Record<string, string>>;
+  midiBase64: string;
+  scoreData: { title: string; totalPages: number };
+  svgPages: string[];
+  timemap: TimeMapEntry[];
+}
+```
+
+| 字段 | 描述 |
+|------|------|
+| `elementAttributes` | 每个音符的 Verovio 属性（staff、pitch 等），以 XML ID 为键 |
+| `midiBase64` | 用于回放的 base64 编码 MIDI 数据 |
+| `scoreData` | 乐谱元数据 —— title（空字符串）和总页数 |
+| `svgPages` | SVG 标记字符串数组，每页一个 |
+| `timemap` | 基于时间的音符开/关事件，带小节标记 |
+
+### 注意事项
+
+- 使用单例缓存的 VerovioToolkit —— 初始化一次后跨调用复用。
+- 如果 Verovio 无法解析输入，抛出 `Error("Failed to load MXL file")`。
+- 服务端的 `scoreData.title` 设为空字符串。CLI 会将其设为输入文件名。
+
+### 示例：Express 端点
+
+```ts
+import express from 'express';
+import { renderScore } from '@muse-player/server';
+import { readFileSync } from 'node:fs';
+
+const app = express();
+
+app.get('/api/score/:name', async (req, res) => {
+  const buffer = readFileSync(`scores/${req.params.name}.mxl`);
+  const result = await renderScore(buffer);
+  res.json(result);
+});
+```

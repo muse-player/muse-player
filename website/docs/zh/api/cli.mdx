@@ -1,0 +1,74 @@
+---
+description: "@muse-player/cli API 参考 —— muse-render 命令，用于预渲染 MXL 文件。"
+---
+
+# @muse-player/cli
+
+CLI 工具，用于将 MXL/MusicXML 乐谱预渲染为静态资源目录。这是 `@muse-player/server` 的便捷封装 —— MXL 文件**必须**经过预渲染才能被 `@muse-player/core` 的 Hooks 消费。
+
+```bash
+# 直接使用
+npx muse-render score.mxl -o public/score
+
+# 或安装为开发依赖
+pnpm add -D @muse-player/cli
+```
+
+---
+
+## muse-render
+
+```
+用法：muse-render <input.mxl> [options]
+
+选项：
+  -o, --output <dir>    输出目录（默认：<input-name>.rendered/）
+  --pageWidth <number>  SVG 页面宽度（默认：1300）
+  --scale <number>      缩放比例（默认：40）
+  -h, --help            显示帮助
+```
+
+### 示例
+
+```bash
+# 基本用法 —— 输出到 score.rendered/
+muse-render score.mxl
+
+# 自定义输出目录
+muse-render score.mxl -o public/scores/my-score
+
+# 调整渲染尺寸
+muse-render score.mxl --pageWidth 1600 --scale 50
+```
+
+### 输出结构
+
+```
+<name>.rendered/
+  manifest.json     # 乐谱元数据 —— 将此 URL 传给 useScore().loadResult()
+  data.json         # MIDI 数据、时间映射、元素属性
+  page-1.svg        # 渲染后的乐谱 SVG 页面
+  page-2.svg
+  ...
+```
+
+### manifest.json
+
+```json
+{
+  "data": "data.json",
+  "pages": ["page-1.svg", "page-2.svg"],
+  "scoreData": { "title": "score", "totalPages": 2 }
+}
+```
+
+`title` 字段设为输入文件名（去掉 `.mxl` 扩展名）。
+
+### 集成
+
+预渲染的资源作为静态文件部署，由 `useScore` 加载：
+
+```ts
+const { loadResult } = useScore();
+loadResult('/scores/my-score/manifest.json');
+```

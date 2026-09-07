@@ -1,0 +1,68 @@
+---
+description: API reference for @muse-player/component — PlaybackControls UI component styled with StyleX.
+---
+
+# @muse-player/component
+
+Pre-built UI components for Muse Player, styled with [StyleX](https://stylexjs.com/).
+
+```bash
+pnpm add @muse-player/component
+```
+
+:::warning
+You must import the stylesheet for component styles to work:
+
+```ts
+import '@muse-player/component/style.css';
+```
+:::
+
+---
+
+## PlaybackControls
+
+A full playback control bar with progress seeking, play/pause/stop, time display, and tempo slider.
+
+```tsx
+import { PlaybackControls } from '@muse-player/component';
+import '@muse-player/component/style.css';
+
+<PlaybackControls
+  playing={playing}
+  currentTime={currentTime}
+  totalDuration={totalDuration}
+  currentMeasure={currentMeasure}
+  tempo={tempo}
+  onPlay={play}
+  onPause={pause}
+  onStop={stop}
+  onSeek={seek}
+  onTempoChange={updateTempo}
+/>
+```
+
+### Props
+
+All props are required.
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `playing` | `boolean` | Whether audio is currently playing |
+| `currentTime` | `number` | Current playback time in seconds |
+| `totalDuration` | `number` | Total duration in seconds |
+| `currentMeasure` | `number` | Current measure index (0-indexed, displayed as +1) |
+| `tempo` | `number` | Current BPM |
+| `onPlay` | `() => void` | Play button handler |
+| `onPause` | `() => void` | Pause button handler |
+| `onStop` | `() => void` | Stop button handler |
+| `onSeek` | `(time: number) => void` | Seek handler — receives time in seconds |
+| `onTempoChange` | `(tempo: number) => void` | Tempo change handler — receives new BPM |
+
+### UI Features
+
+- **Progress bar** — clickable track with fill indicator. Click position is converted to a time ratio.
+- **Play/Pause button** — circular orange button, toggles icon between play and pause states.
+- **Stop button** — bordered circle with stop icon.
+- **Time display** — monospace `M:SS / M:SS` format, plus current measure number.
+- **Tempo slider** — range input from 40 to 240 BPM with current value display.

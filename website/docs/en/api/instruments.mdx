@@ -1,0 +1,82 @@
+---
+description: API reference for @muse-player/instruments — piano sample manifests and URL resolution.
+---
+
+# @muse-player/instruments
+
+Piano sample manifests and URL resolution for realistic audio playback.
+
+```bash
+pnpm add @muse-player/instruments
+```
+
+---
+
+## getPianoSampleUrls
+
+Returns a mapping of note names to full MP3 URLs for all 84 piano samples (C1 through B7).
+
+```ts
+import { getPianoSampleUrls } from '@muse-player/instruments';
+
+// Default CDN
+const urls = getPianoSampleUrls();
+// { "C1": "https://nbrosowsky.github.io/.../C1.mp3", "C#1": "...", ... }
+
+// Self-hosted
+const urls = getPianoSampleUrls('/samples/piano/');
+// { "C1": "/samples/piano/C1.mp3", ... }
+```
+
+### Signature
+
+```ts
+function getPianoSampleUrls(baseUrl?: string): Record<string, string>
+```
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `baseUrl` | `string` | `PIANO_CDN_URL` | Base URL where MP3 files are hosted |
+
+**Returns:** A `Record<string, string>` mapping note names (e.g., `"C4"`, `"F#5"`) to full URLs.
+
+---
+
+## PIANO_CDN_URL
+
+```ts
+const PIANO_CDN_URL = 'https://nbrosowsky.github.io/tonejs-instruments/samples/piano/';
+```
+
+Default CDN URL for piano samples. Used by `usePianoSampler` when no custom `baseUrl` is provided.
+
+---
+
+## PIANO_MANIFEST
+
+```ts
+const PIANO_MANIFEST: Record<string, string>;
+```
+
+Maps note names to relative MP3 filenames. Covers 84 notes from C1 to B7 (all naturals and sharps).
+
+```ts
+{
+  "C1": "C1.mp3",
+  "C#1": "Cs1.mp3",
+  "D1": "D1.mp3",
+  // ...
+  "B7": "B7.mp3"
+}
+```
+
+### Self-hosting Piano Samples
+
+To host samples yourself, download the MP3 files and pass your base URL:
+
+```ts
+// usePianoSampler uses getPianoSampleUrls internally
+const { sampler } = usePianoSampler({ baseUrl: '/my-piano-samples/' });
+```
+
+Make sure your server serves the MP3 files at the expected paths (e.g., `/my-piano-samples/C4.mp3`).

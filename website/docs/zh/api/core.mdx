@@ -1,0 +1,261 @@
+---
+description: "@muse-player/core API 参考 —— React Hooks，覆盖乐谱加载、MIDI 回放、音符高亮和自动滚动。"
+---
+
+# @muse-player/core
+
+MXL/MusicXML 乐谱渲染与回放的核心 React Hooks 和组件。
+
+```bash
+pnpm add @muse-player/core
+```
+
+**Peer 依赖：** `react >=18`、`react-dom >=18`
+
+:::warning
+此包**不包含** Verovio 或任何 MXL 解析能力。它仅消费由 `@muse-player/server` 或 `muse-render` CLI 生成的预渲染静态产物（manifest.json、data.json、SVG 页面）。你**必须**在使用这些 Hooks 之前先预渲染 MXL 文件。
+:::
+
+---
+
+## Hooks
+
+### useScore
+
+从 manifest URL 加载预渲染的乐谱数据。URL **必须**指向由 `@muse-player/server` 或 `muse-render` 生成的 `manifest.json`。此 Hook 无法加载原始 MXL/MusicXML 文件。
+
+```ts
+function useScore(): ScoreState
+```
+
+**参数：** 无
+
+**返回值：**
+
+| 字段 | 类型 | 描述 |
+|------|------|------|
+| `loadResult` | `(url: string) => Promise<void>` | 获取 `url` 处的 manifest，加载所有页面和数据 |
+| `loading` | `boolean` | 获取进行中为 `true` |
+| `error` | `string \| null` | 加载失败时的错误信息 |
+| `svg` | `string` | 当前页面的 SVG 标记 |
+| `currentPage` | `number` | 当前活动页面（从 1 开始） |
+| `totalPages` | `number` | SVG 页面总数 |
+| `renderPage` | `(page: number) => void` | 切换到指定页面（从 1 开始） |
+| `midiBase64` | `string` | 用于回放的 base64 编码 MIDI 数据 |
+| `timeMap` | `TimeMapEntry[]` | 基于时间的音符事件 |
+| `scoreData` | `ScoreData \| null` | 来自 manifest 的 `{ title, totalPages }` |
+| `getElementsAtTime` | `(ms: number) => { notes: string[]; page: number }` | 指定毫秒时间戳处的活跃音符 ID 和页码 |
+| `getElementAttr` | `(xmlId: string) => Record<string, string>` | 音符元素的 Verovio 属性 |
+| `getPageWithElement` | `(xmlId: string) => number` | 包含该元素的页码（从 1 开始，未找到返回 0） |
+| `getTimeForElement` | `(xmlId: string) => number` | 音符首次出现在时间映射中的时间（秒） |
+
+---
+
+### usePlayback
+
+完整的 MIDI 回放引擎。解析 base64 MIDI，通过 Tone.js 调度音符，跟踪时间和小节，并支持实时速度变更。
+
+```ts
+function usePlayback(
+  midiBase64: string,
+  timeMap: TimeMapEntry[],
+  onTimeUpdate?: (time: number) => void,
+  onNotesUpdate?: (noteIds: string[]) => void,
+  instrument?: { sampler: any } | null,
+): PlaybackControls
+```
+
+**参数：**
+
+| 参数 | 类型 | 描述 |
+|------|------|------|
+| `midiBase64` | `string` | 来自 `useScore` 的 base64 编码 MIDI 数据 |
+| `timeMap` | `TimeMapEntry[]` | 来自 `useScore` 的时间映射 |
+| `onTimeUpdate` | `(time: number) => void` | 每个十六分音符 tick 时调用，传入当前时间（秒）。用于通过 `getElementsAtTime` 驱动页面切换。 |
+| `onNotesUpdate` | `(noteIds: string[]) => void` | 新音符激活时调用。传入活跃的 XML 音符 ID 数组。 |
+| `instrument` | `{ sampler: any } \| null` | 来自 `usePianoSampler` 的 Tone.Sampler 实例。为 null 时回退到基本的 PolySynth。 |
+
+**返回值：**
+
+| 字段 | 类型 | 描述 |
+|------|------|------|
+| `play` | `() => Promise<void>` | 启动音频上下文和回放 |
+| `pause` | `() => void` | 暂停（保留位置） |
+| `stop` | `() => void` | 停止并重置到开头 |
+| `seek` | `(seconds: number) => void` | 跳转到绝对时间 |
+| `seekToMeasure` | `(index: number) => void` | 按时间映射索引跳转到小节 |
+| `playing` | `boolean` | 回放是否活动 |
+| `currentTime` | `number` | 当前位置（秒） |
+| `totalDuration` | `number` | MIDI 总时长（秒） |
+| `currentMeasure` | `number` | 当前小节索引（从 0 开始） |
+| `tempo` | `number` | 当前 BPM（默认：120） |
+| `updateTempo` | `(bpm: number) => void` | 实时更改 BPM |
+
+:::warning
+首次 `play()` 调用会触发 `Tone.start()`，这是浏览器音频策略所要求的。必须从用户手势处理器中调用。
+:::
+
+---
+
+### usePianoSampler
+
+通过 Tone.Sampler 加载逼真的钢琴采样，带有压缩器和混响效果链。
+
+```ts
+function usePianoSampler(options?: UsePianoSamplerOptions): PianoSamplerState
+```
+
+**参数：**
+
+| 参数 | 类型 | 描述 |
+|------|------|------|
+| `options.baseUrl` | `string` | 钢琴采样 MP3 文件的基础 URL。默认：CDN `nbrosowsky.github.io/tonejs-instruments/samples/piano/` |
+
+**返回值：**
+
+| 字段 | 类型 | 描述 |
+|------|------|------|
+| `loading` | `boolean` | 采样下载中为 `true` |
+| `ready` | `boolean` | 采样器准备就绪为 `true` |
+| `error` | `string \| null` | 加载失败时的错误信息 |
+| `sampler` | `Tone.Sampler \| null` | 传给 `usePlayback` 的 `{ sampler }` |
+
+音频链路：**采样器 -> 压缩器 -> 混响 -> 输出**
+
+---
+
+### useAutoScroll
+
+在回放期间自动滚动乐谱容器，使当前小节保持可见。
+
+```ts
+function useAutoScroll(
+  containerRef: React.RefObject<HTMLDivElement | null>,
+  currentMeasure: number,
+  isPlaying: boolean,
+): AutoScrollState
+```
+
+**参数：**
+
+| 参数 | 类型 | 描述 |
+|------|------|------|
+| `containerRef` | `RefObject<HTMLDivElement>` | 可滚动乐谱容器的 ref |
+| `currentMeasure` | `number` | 来自 `usePlayback` 的当前小节 |
+| `isPlaying` | `boolean` | 回放是否活动 |
+
+**返回值：**
+
+| 字段 | 类型 | 描述 |
+|------|------|------|
+| `autoScrollEnabled` | `boolean` | 自动滚动是否活动 |
+| `setAutoScrollEnabled` | `(enabled: boolean) => void` | 手动切换自动滚动 |
+
+手动滚动会禁用自动滚动 5 秒。回放开始时会立即重新启用。
+
+---
+
+### useNoteHighlight
+
+在乐谱上为活跃播放的音符绘制彩色覆盖矩形。右手蓝色（staff 1），左手红色（staff 2）。
+
+```ts
+function useNoteHighlight(
+  containerRef: React.RefObject<HTMLDivElement | null>,
+  activeNoteIds: string[],
+  getElementAttribute: (xmlId: string) => Record<string, string>,
+): void
+```
+
+**参数：**
+
+| 参数 | 类型 | 描述 |
+|------|------|------|
+| `containerRef` | `RefObject<HTMLDivElement>` | 乐谱容器的 ref |
+| `activeNoteIds` | `string[]` | 来自 `usePlayback` 的 `onNotesUpdate` 的活跃音符 ID |
+| `getElementAttribute` | `(xmlId: string) => Record<string, string>` | 来自 `useScore` 的 `getElementAttr` |
+
+此 Hook 纯粹产生副作用 —— 不返回任何值。
+
+---
+
+## 组件
+
+### ScoreRenderer
+
+在可滚动容器中渲染单个 SVG 页面。
+
+```tsx
+<ScoreRenderer containerRef={containerRef} svg={svg} />
+```
+
+| Prop | 类型 | 描述 |
+|------|------|------|
+| `containerRef` | `RefObject<HTMLDivElement>` | 外层可滚动 div 的 ref（供 `useAutoScroll` 和 `useNoteHighlight` 使用） |
+| `svg` | `string` | 要渲染的原始 SVG 标记字符串 |
+
+---
+
+## 类型
+
+### TimeMapEntry
+
+```ts
+interface TimeMapEntry {
+  off?: string[];       // 此时间结束的音符 XML ID
+  on?: string[];        // 此时间开始的音符 XML ID
+  qstamp: number;       // 四分音符标记（乐谱中的位置）
+  tempo?: number;       // 此条目的速度（BPM）
+  tstamp: number;       // 绝对时间戳（毫秒）
+}
+```
+
+### ScoreData
+
+```ts
+interface ScoreData {
+  title: string;
+  totalPages: number;
+}
+```
+
+### ScoreManifest
+
+```ts
+interface ScoreManifest {
+  data: string;          // data.json 的相对路径
+  pages: string[];       // SVG 页面文件的相对路径
+  scoreData: { title: string; totalPages: number };
+}
+```
+
+### ScoreRenderResult
+
+```ts
+interface ScoreRenderResult {
+  elementAttributes: ElementAttributes;
+  midiBase64: string;
+  scoreData: { title: string; totalPages: number };
+  svgPages: string[];
+  timemap: TimeMapEntry[];
+}
+```
+
+### ElementAttributes
+
+```ts
+interface ElementAttributes {
+  [xmlId: string]: Record<string, string>;
+}
+```
+
+### NoteEvent
+
+```ts
+interface NoteEvent {
+  duration: number;  // 音符时长（秒）
+  midi: number;      // MIDI 音符号（0-127）
+  pitch: string;     // 音名（如 "C4"、"F#5"）
+  time: number;      // 开始时间（秒）
+}
+```

@@ -1,0 +1,99 @@
+---
+description: API reference for @muse-player/server — Node.js MXL rendering via Verovio WASM.
+---
+
+# @muse-player/server
+
+Node.js library for server-side MXL/MusicXML score rendering via [Verovio](https://www.verovio.org/) WASM. This is the **required** entry point for processing MXL files — `@muse-player/core` cannot parse MXL files directly and only consumes the output of this package.
+
+```bash
+pnpm add @muse-player/server
+```
+
+---
+
+## renderScore
+
+Converts an MXL (compressed MusicXML) file into SVG pages, MIDI data, timemap, and element attributes.
+
+```ts
+import { renderScore } from '@muse-player/server';
+import { readFileSync } from 'node:fs';
+
+const buffer = readFileSync('score.mxl');
+const result = await renderScore(buffer);
+```
+
+### Signature
+
+```ts
+async function renderScore(
+  mxlBuffer: ArrayBuffer | Buffer,
+  options?: RenderOptions,
+): Promise<ScoreRenderResult>
+```
+
+### Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `mxlBuffer` | `ArrayBuffer \| Buffer` | Raw bytes of an MXL file |
+| `options` | `RenderOptions` | Verovio rendering options (optional) |
+
+### Default Options
+
+```ts
+{
+  adjustPageHeight: true,
+  breaks: 'auto',
+  font: 'Leipzig',
+  footer: 'none',
+  header: 'none',
+  pageWidth: 1300,
+  scale: 40,
+}
+```
+
+`RenderOptions` extends Verovio's native options. See the [Verovio documentation](https://www.verovio.org/) for the full list.
+
+### Return Value
+
+```ts
+interface ScoreRenderResult {
+  elementAttributes: Record<string, Record<string, string>>;
+  midiBase64: string;
+  scoreData: { title: string; totalPages: number };
+  svgPages: string[];
+  timemap: TimeMapEntry[];
+}
+```
+
+| Field | Description |
+|-------|-------------|
+| `elementAttributes` | Per-note Verovio attributes (staff, pitch, etc.) keyed by XML ID |
+| `midiBase64` | Base64-encoded MIDI data for playback |
+| `scoreData` | Score metadata — title (empty string) and total page count |
+| `svgPages` | Array of SVG markup strings, one per page |
+| `timemap` | Time-indexed note on/off events with measure markers |
+
+### Notes
+
+- Uses a singleton cached VerovioToolkit — initialized once and reused across calls.
+- Throws `Error("Failed to load MXL file")` if Verovio cannot parse the input.
+- `scoreData.title` is set to an empty string by the server. The CLI sets it to the input filename.
+
+### Example: Express Endpoint
+
+```ts
+import express from 'express';
+import { renderScore } from '@muse-player/server';
+import { readFileSync } from 'node:fs';
+
+const app = express();
+
+app.get('/api/score/:name', async (req, res) => {
+  const buffer = readFileSync(`scores/${req.params.name}.mxl`);
+  const result = await renderScore(buffer);
+  res.json(result);
+});
+```

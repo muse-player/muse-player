@@ -8,6 +8,6 @@ dist
 
 reference
 *.rendered.json
-docs/
+/docs/
 
 *.tsbuildinfo

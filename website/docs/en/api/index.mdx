@@ -1,0 +1,37 @@
+---
+title: API Overview
+description: Overview of all Muse Player packages and their public APIs.
+overview: true
+---
+
+Muse Player is organized as a monorepo with five packages, each with a focused responsibility.
+
+## Packages
+
+### [@muse-player/core](/api/core)
+
+Core React hooks and the `ScoreRenderer` component. This is the primary package for integrating Muse Player into a React application.
+
+**Exports:** `useScore`, `usePlayback`, `usePianoSampler`, `useAutoScroll`, `useNoteHighlight`, `ScoreRenderer`
+
+### [@muse-player/component](/api/component)
+
+Pre-built UI components for playback controls, styled with StyleX.
+
+**Exports:** `PlaybackControls`
+
+### [@muse-player/server](/api/server)
+
+Node.js library for server-side MXL/MusicXML rendering via Verovio WASM. Converts MXL files into SVG pages, MIDI data, and timemaps.
+
+**Exports:** `renderScore`
+
+### [@muse-player/cli](/api/cli)
+
+CLI tool (`muse-render`) for pre-rendering MXL files to static asset directories.
+
+### [@muse-player/instruments](/api/instruments)
+
+Piano sample manifests and URL resolution for realistic audio playback.
+
+**Exports:** `getPianoSampleUrls`, `PIANO_MANIFEST`, `PIANO_CDN_URL`
