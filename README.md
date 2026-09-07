@@ -6,7 +6,8 @@ MXL/MusicXML score rendering and playback monorepo. Renders sheet music to SVG v
 
 | Package | Description |
 |---------|-------------|
-| [`@muse-player/core`](packages/core) | React components and hooks for score rendering and playback |
+| [`@muse-player/core`](packages/core) | React hooks for score loading, MIDI playback, note highlighting, and auto-scrolling |
+| [`@muse-player/component`](packages/component) | UI components (PlaybackControls) styled with StyleX |
 | [`@muse-player/server`](packages/server) | Node.js server-side MXL rendering via Verovio WASM |
 | [`@muse-player/cli`](packages/cli) | CLI tool for pre-rendering MXL files to static assets |
 | [`@muse-player/instruments`](packages/instruments) | Piano sample manifests and audio files |
@@ -49,7 +50,9 @@ SVG pages + MIDI + timemap + element attributes
   ├── usePianoSampler — loads piano samples for realistic audio
   ├── useAutoScroll   — auto-scrolls during playback
   ├── useNoteHighlight — highlights active notes on score
-  ├── ScoreRenderer   — renders SVG pages
+  └── ScoreRenderer   — renders SVG pages
+
+@muse-player/component (React, StyleX)
   └── PlaybackControls — play/pause/stop/seek/tempo UI
 ```
 
@@ -68,7 +71,7 @@ This produces a directory containing `manifest.json`, `data.json`, and SVG page 
 
 - **Rendering**: [Verovio](https://www.verovio.org/) WASM
 - **Audio**: [Tone.js](https://tonejs.github.io/) + [@tonejs/midi](https://github.com/Tonejs/midi)
-- **UI**: React 19 + Tailwind CSS
+- **UI**: React 19 + Tailwind CSS + StyleX
 - **Build**: Rslib / Rsbuild + pnpm workspaces
 - **Language**: TypeScript
 
