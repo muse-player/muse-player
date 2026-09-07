@@ -27,26 +27,7 @@ import { ScoreRenderer } from "@muse-player/core";
 | `containerRef` | `RefObject<HTMLDivElement>` | Ref to the scrollable container (used by auto-scroll and note highlight) |
 | `svg` | `string` | SVG markup for the current page |
 
-### `<PlaybackControls>`
-
-Play/pause/stop buttons, progress bar with seek, time display, and tempo slider.
-
-```tsx
-import { PlaybackControls } from "@muse-player/core";
-
-<PlaybackControls
-  currentMeasure={currentMeasure}
-  currentTime={currentTime}
-  onPause={pause}
-  onPlay={play}
-  onSeek={seek}
-  onStop={stop}
-  onTempoChange={updateTempo}
-  playing={playing}
-  tempo={tempo}
-  totalDuration={totalDuration}
-/>
-```
+UI controls such as `<PlaybackControls>` have moved to [`@muse-player/component`](../component/README.md).
 
 ## Hooks
 

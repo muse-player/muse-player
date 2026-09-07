@@ -1,3 +1,4 @@
+import * as stylex from "@stylexjs/stylex";
 import { useCallback, useRef } from "react";
 
 interface PlaybackControlsProperties {
@@ -12,6 +13,165 @@ interface PlaybackControlsProperties {
   tempo: number;
   totalDuration: number;
 }
+
+const styles = stylex.create({
+  buttonGroup: {
+    alignItems: "center",
+    display: "flex",
+    gap: 12,
+  },
+  controlsRow: {
+    alignItems: "center",
+    display: "flex",
+    justifyContent: "space-between",
+  },
+  iconLarge: {
+    height: 20,
+    width: 20,
+  },
+  iconSmall: {
+    height: 16,
+    width: 16,
+  },
+  measure: {
+    color: "#94a3b8",
+    fontSize: 12,
+    lineHeight: "16px",
+    marginLeft: 8,
+  },
+  mono: {
+    fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+  },
+  playButton: {
+    alignItems: "center",
+    backgroundColor: {
+      ":active": "#c2410c",
+      ":hover": "#ea580c",
+      "default": "#f97316",
+    },
+    borderRadius: 9999,
+    borderStyle: "none",
+    boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)",
+    color: "white",
+    cursor: "pointer",
+    display: "flex",
+    height: 40,
+    justifyContent: "center",
+    scale: {
+      ":active": "95%",
+      "default": "100%",
+    },
+    transitionProperty: "background-color",
+    width: 40,
+  },
+  progressFill: {
+    backgroundColor: "#f97316",
+    borderRadius: 9999,
+    height: "100%",
+    left: 0,
+    position: "absolute",
+    top: 0,
+    transitionDuration: "100ms",
+    transitionProperty: "width",
+  },
+  progressThumb: {
+    backgroundColor: "white",
+    borderColor: "#f97316",
+    borderRadius: 9999,
+    borderStyle: "solid",
+    borderWidth: 2,
+    boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
+    height: 14,
+    opacity: {
+      ":hover": 1,
+      "default": 0,
+    },
+    position: "absolute",
+    top: "50%",
+    transform: "translateY(-50%)",
+    transitionProperty: "opacity",
+    width: 14,
+  },
+  progressTrack: {
+    backgroundColor: "#e2e8f0",
+    borderRadius: 9999,
+    cursor: "pointer",
+    height: 6,
+    marginBottom: 12,
+    position: "relative",
+    width: "100%",
+  },
+  root: {
+    backgroundColor: "white",
+    borderTopColor: "#e2e8f0",
+    borderTopStyle: "solid",
+    borderTopWidth: 1,
+    boxShadow: "0 -2px 8px rgba(0,0,0,0.06)",
+    display: "flex",
+    flexDirection: "column",
+    paddingBottom: 12,
+    paddingLeft: 16,
+    paddingRight: 16,
+    paddingTop: 12,
+  },
+  separator: {
+    color: "#94a3b8",
+  },
+  stopButton: {
+    alignItems: "center",
+    backgroundColor: {
+      ":active": "#e2e8f0",
+      ":hover": "#f1f5f9",
+      "default": "transparent",
+    },
+    borderColor: "#cbd5e1",
+    borderRadius: 9999,
+    borderStyle: "solid",
+    borderWidth: 1,
+    color: "#475569",
+    cursor: "pointer",
+    display: "flex",
+    height: 32,
+    justifyContent: "center",
+    scale: {
+      ":active": "95%",
+      "default": "100%",
+    },
+    transitionProperty: "background-color",
+    width: 32,
+  },
+  tempoGroup: {
+    alignItems: "center",
+    display: "flex",
+    gap: 8,
+  },
+  tempoLabel: {
+    color: "#64748b",
+    fontSize: 12,
+    lineHeight: "16px",
+  },
+  tempoSlider: {
+    accentColor: "#f97316",
+    height: 4,
+    width: 80,
+  },
+  tempoValue: {
+    color: "#475569",
+    fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+    fontSize: 12,
+    lineHeight: "16px",
+    textAlign: "right",
+    width: 32,
+  },
+  timeDisplay: {
+    alignItems: "center",
+    color: "#475569",
+    display: "flex",
+    fontSize: 14,
+    gap: 8,
+    lineHeight: "20px",
+  },
+});
 
 export function PlaybackControls({
   currentMeasure,
@@ -41,39 +201,39 @@ export function PlaybackControls({
   const progress = totalDuration > 0 ? (currentTime / totalDuration) * 100 : 0;
 
   return (
-    <div className="flex flex-col border-t border-slate-200 bg-white px-4 py-3 shadow-[0_-2px_8px_rgba(0,0,0,0.06)]">
+    <div {...stylex.props(styles.root)}>
       {/* Progress bar */}
       <div
-        className="group relative mb-3 h-1.5 w-full cursor-pointer rounded-full bg-slate-200"
+        {...stylex.props(styles.progressTrack)}
         onClick={handleProgressClick}
         ref={progressReference}
       >
         <div
-          className="absolute left-0 top-0 h-full rounded-full bg-orange-500 transition-[width] duration-100"
+          {...stylex.props(styles.progressFill)}
           style={{ width: `${progress}%` }}
         />
         <div
-          className="absolute top-1/2 h-3.5 w-3.5 -translate-y-1/2 rounded-full border-2 border-orange-500 bg-white opacity-0 shadow-sm transition-opacity group-hover:opacity-100"
+          {...stylex.props(styles.progressThumb)}
           style={{ left: `calc(${progress}% - 7px)` }}
         />
       </div>
 
       {/* Controls row */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div {...stylex.props(styles.controlsRow)}>
+        <div {...stylex.props(styles.buttonGroup)}>
           {/* Play/Pause */}
           <button
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-500 text-white shadow-md transition hover:bg-orange-600 active:scale-95"
+            {...stylex.props(styles.playButton)}
             onClick={playing ? onPause : onPlay}
           >
             {playing
               ? (
-                  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                  <svg {...stylex.props(styles.iconLarge)} fill="currentColor" viewBox="0 0 24 24">
                     <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
                   </svg>
                 )
               : (
-                  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                  <svg {...stylex.props(styles.iconLarge)} fill="currentColor" viewBox="0 0 24 24">
                     <path d="M8 5v14l11-7z" />
                   </svg>
                 )}
@@ -81,38 +241,38 @@ export function PlaybackControls({
 
           {/* Stop */}
           <button
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-300 text-slate-600 transition hover:bg-slate-100 active:scale-95"
+            {...stylex.props(styles.stopButton)}
             onClick={onStop}
           >
-            <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+            <svg {...stylex.props(styles.iconSmall)} fill="currentColor" viewBox="0 0 24 24">
               <path d="M6 6h12v12H6z" />
             </svg>
           </button>
         </div>
 
         {/* Time display */}
-        <div className="flex items-center gap-2 text-sm text-slate-600">
-          <span className="font-mono">{formatTime(currentTime)}</span>
-          <span className="text-slate-400">/</span>
-          <span className="font-mono">{formatTime(totalDuration)}</span>
-          <span className="ml-2 text-xs text-slate-400">
+        <div {...stylex.props(styles.timeDisplay)}>
+          <span {...stylex.props(styles.mono)}>{formatTime(currentTime)}</span>
+          <span {...stylex.props(styles.separator)}>/</span>
+          <span {...stylex.props(styles.mono)}>{formatTime(totalDuration)}</span>
+          <span {...stylex.props(styles.measure)}>
             M.
             {currentMeasure + 1}
           </span>
         </div>
 
         {/* Tempo control */}
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-500">BPM</span>
+        <div {...stylex.props(styles.tempoGroup)}>
+          <span {...stylex.props(styles.tempoLabel)}>BPM</span>
           <input
-            className="h-1 w-20 accent-orange-500"
+            {...stylex.props(styles.tempoSlider)}
             max={240}
             min={40}
             onChange={event => onTempoChange(Number(event.target.value))}
             type="range"
             value={tempo}
           />
-          <span className="w-8 text-right text-xs font-mono text-slate-600">
+          <span {...stylex.props(styles.tempoValue)}>
             {tempo}
           </span>
         </div>
