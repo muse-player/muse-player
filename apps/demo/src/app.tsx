@@ -1,5 +1,5 @@
+import { PlaybackControls } from "@muse-player/component";
 import {
-  PlaybackControls,
   ScoreRenderer,
   useAutoScroll,
   useNoteHighlight,

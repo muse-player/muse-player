@@ -44,6 +44,9 @@ importers:
 
   apps/demo:
     dependencies:
+      '@muse-player/component':
+        specifier: workspace:*
+        version: link:../../packages/component
       '@muse-player/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -106,6 +109,34 @@ importers:
       '@types/node':
         specifier: ^24.3.0
         version: 24.13.3
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+
+  packages/component:
+    dependencies:
+      '@muse-player/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      '@rsbuild/plugin-react':
+        specifier: ^2.1.0
+        version: 2.1.0(@rsbuild/core@2.2.1(core-js@3.45.1))(@rspack/core@2.2.1(@swc/helpers@0.5.23))
+      '@rslib/core':
+        specifier: ^0.23.2
+        version: 0.23.2(core-js@3.45.1)(typescript@6.0.3)
+      '@types/react':
+        specifier: ^19.2.18
+        version: 19.2.18
+      '@types/react-dom':
+        specifier: ^19.2.5
+        version: 19.2.5(@types/react@19.2.18)
+      react:
+        specifier: ^19.2.8
+        version: 19.2.8
+      react-dom:
+        specifier: ^19.2.8
+        version: 19.2.8(react@19.2.8)
       typescript:
         specifier: ^6.0.3
         version: 6.0.3

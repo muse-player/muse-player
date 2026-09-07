@@ -9,6 +9,7 @@
     "preview": "rsbuild preview"
   },
   "dependencies": {
+    "@muse-player/component": "workspace:*",
     "@muse-player/core": "workspace:*",
     "@muse-player/instruments": "workspace:*",
     "@tonejs/midi": "^2.0.28",

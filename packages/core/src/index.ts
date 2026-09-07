@@ -1,5 +1,4 @@
 // Components
-export { PlaybackControls } from "./components/playback-controls";
 export { ScoreRenderer } from "./components/score-renderer";
 
 // Hooks

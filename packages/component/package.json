@@ -1,8 +1,8 @@
 {
-  "name": "@muse-player/core",
+  "name": "@muse-player/component",
   "type": "module",
   "version": "0.1.0",
-  "description": "Core components and hooks for MXL/MusicXML score rendering and playback",
+  "description": "UI components for Muse Player",
   "author": {
     "email": "admin@rikka.cc",
     "name": "Rikka",
@@ -16,10 +16,6 @@
     ".": {
       "types": "./dist/src/index.d.ts",
       "import": "./dist/index.js"
-    },
-    "./hooks/*": {
-      "types": "./dist/src/hooks/*.d.ts",
-      "import": "./dist/hooks/*.js"
     }
   },
   "main": "./dist/index.js",
@@ -41,9 +37,7 @@
     }
   },
   "dependencies": {
-    "@muse-player/instruments": "workspace:*",
-    "@tonejs/midi": "^2.0.28",
-    "tone": "^15.1.22"
+    "@muse-player/core": "workspace:*"
   },
   "devDependencies": {
     "@rsbuild/plugin-react": "^2.1.0",
