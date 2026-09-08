@@ -11,3 +11,4 @@ reference
 /docs/
 
 *.tsbuildinfo
+.turbo

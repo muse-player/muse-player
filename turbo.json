@@ -1,0 +1,24 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"]
+    },
+    "rspress-doc-template#build": {
+      "dependsOn": ["^build"],
+      "outputs": ["doc_build/**"]
+    },
+    "dev": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "persistent": true
+    },
+    "lint": {},
+    "preview": {
+      "cache": false,
+      "persistent": true
+    },
+    "download:piano": {}
+  }
+}
