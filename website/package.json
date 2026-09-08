@@ -6,6 +6,7 @@
   "scripts": {
     "build": "rspress build",
     "dev": "rspress dev",
+    "lint": "eslint . --cache",
     "preview": "rspress preview"
   },
   "dependencies": {

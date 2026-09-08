@@ -16,6 +16,7 @@ export function ScoreRenderer({ containerRef, svg }: ScoreRendererProperties) {
       <div className="relative h-full w-full p-4">
         <div
           className="flex h-full w-full items-center justify-center"
+          // eslint-disable-next-line react/dom-no-dangerously-set-innerhtml
           dangerouslySetInnerHTML={{ __html: responsiveSvg }}
         />
       </div>

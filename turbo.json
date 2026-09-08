@@ -14,7 +14,9 @@
       "cache": false,
       "persistent": true
     },
-    "lint": {},
+    "lint": {
+      "outputs": [".eslintcache"]
+    },
     "preview": {
       "cache": false,
       "persistent": true

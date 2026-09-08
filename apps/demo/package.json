@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "rsbuild dev --open",
     "build": "rsbuild build",
+    "lint": "eslint . --cache",
     "preview": "rsbuild preview"
   },
   "dependencies": {

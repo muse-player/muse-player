@@ -20,7 +20,8 @@
     "src"
   ],
   "scripts": {
-    "download:piano": "node --loader ts-node/esm scripts/download-piano.ts"
+    "download:piano": "node --loader ts-node/esm scripts/download-piano.ts",
+    "lint": "eslint . --cache"
   },
   "devDependencies": {
     "ts-node": "^10.9.2",

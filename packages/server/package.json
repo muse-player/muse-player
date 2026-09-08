@@ -25,7 +25,8 @@
   ],
   "scripts": {
     "build": "rslib build",
-    "dev": "rslib build --watch"
+    "dev": "rslib build --watch",
+    "lint": "eslint . --cache"
   },
   "dependencies": {
     "@muse-player/core": "workspace:*",

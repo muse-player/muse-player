@@ -73,6 +73,7 @@ export default function App() {
   }, [loadResult]);
 
   useEffect(() => {
+    // eslint-disable-next-line react/set-state-in-effect
     setPageInput(String(currentPage));
   }, [currentPage]);
 

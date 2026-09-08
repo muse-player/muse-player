@@ -26,7 +26,8 @@
   ],
   "scripts": {
     "build": "rimraf dist && rslib build && node scripts/extract-stylex.mjs",
-    "dev": "rslib build --watch"
+    "dev": "rslib build --watch",
+    "lint": "eslint . --cache"
   },
   "peerDependencies": {
     "react": ">=18.0.0",
