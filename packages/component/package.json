@@ -1,7 +1,7 @@
 {
   "name": "@muse-player/component",
   "type": "module",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "UI components for Muse Player",
   "author": {
     "email": "admin@rikka.cc",

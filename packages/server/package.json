@@ -1,7 +1,7 @@
 {
   "name": "@muse-player/server",
   "type": "module",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Node.js library for server-side MXL/MusicXML score rendering via Verovio",
   "author": {
     "email": "admin@rikka.cc",

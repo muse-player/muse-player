@@ -1,7 +1,7 @@
 {
   "name": "@muse-player/core",
   "type": "module",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Core components and hooks for MXL/MusicXML score rendering and playback",
   "author": {
     "email": "admin@rikka.cc",

@@ -1,7 +1,7 @@
 {
   "name": "@muse-player/cli",
   "type": "module",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "CLI tool for pre-rendering MXL/MusicXML scores via @muse-player/server",
   "author": {
     "email": "admin@rikka.cc",
@@ -27,7 +27,7 @@
   },
   "devDependencies": {
     "@rslib/core": "^0.23.2",
-    "@types/node": "^24.3.0",
+    "@types/node": "^26.4.1",
     "typescript": "^6.0.3"
   }
 }
