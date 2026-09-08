@@ -81,10 +81,6 @@ export function useNoteHighlight(
     if (!overlay)
       return;
 
-    const container = containerReference.current;
-    if (!container)
-      return;
-
     // Group note bounding rects by hand
     const rectsByHand = new Map<Hand, DOMRect[]>();
     for (const id of activeNoteIds) {
@@ -115,7 +111,7 @@ export function useNoteHighlight(
       return;
 
     // Create or update one merged div per active hand
-    const containerRect = container.getBoundingClientRect();
+    const overlayRect = overlay.getBoundingClientRect();
     const padding = 2;
     for (const [hand, rects] of rectsByHand) {
       const minX = Math.min(...rects.map(r => r.left));
@@ -134,8 +130,8 @@ export function useNoteHighlight(
         existing.set(hand, div);
       }
 
-      div.style.left = `${minX - containerRect.left + container.scrollLeft - padding}px`;
-      div.style.top = `${minY - containerRect.top + container.scrollTop - padding}px`;
+      div.style.left = `${minX - overlayRect.left - padding}px`;
+      div.style.top = `${minY - overlayRect.top - padding}px`;
       div.style.width = `${maxX - minX + padding * 2}px`;
       div.style.height = `${maxY - minY + padding * 2}px`;
     }

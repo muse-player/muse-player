@@ -14,8 +14,6 @@ interface PlaybackControlsProperties {
   totalDuration: number;
 }
 
-const NARROW = "@media (max-width: 639px)";
-
 const styles = stylex.create({
   buttonGroup: {
     alignItems: "center",
@@ -25,10 +23,6 @@ const styles = stylex.create({
   controlsRow: {
     alignItems: "center",
     display: "flex",
-    flexWrap: "wrap",
-    gap: {
-      [NARROW]: 8,
-    },
     justifyContent: "space-between",
   },
   iconLarge: {
@@ -150,9 +144,6 @@ const styles = stylex.create({
     alignItems: "center",
     display: "flex",
     gap: 8,
-    width: {
-      [NARROW]: "100%",
-    },
   },
   tempoLabel: {
     color: "#64748b",
@@ -161,9 +152,6 @@ const styles = stylex.create({
   },
   tempoSlider: {
     accentColor: "#f97316",
-    flex: {
-      [NARROW]: 1,
-    },
     height: 4,
     width: 80,
   },
