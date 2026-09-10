@@ -9,14 +9,14 @@
     "url": "https://github.com/Muromi-Rikka"
   },
   "license": "MIT",
-  "homepage": "https://github.com/Muromi-Rikka/muse-player#readme",
+  "homepage": "https://github.com/muse-player/muse-player#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Muromi-Rikka/muse-player.git",
+    "url": "https://github.com/muse-player/muse-player.git",
     "directory": "packages/component"
   },
   "bugs": {
-    "url": "https://github.com/Muromi-Rikka/muse-player/issues"
+    "url": "https://github.com/muse-player/muse-player/issues"
   },
   "keywords": [
     "musicxml",
