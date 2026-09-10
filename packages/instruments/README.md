@@ -1,5 +1,8 @@
 # @muse-player/instruments
 
+[![npm version](https://img.shields.io/npm/v/@muse-player/instruments)](https://www.npmjs.com/package/@muse-player/instruments)
+[![license](https://img.shields.io/npm/l/@muse-player/instruments)](../../LICENSE)
+
 Piano sample manifests and audio files for Muse Player.
 
 Provides a mapping from note names to MP3 sample URLs, used by `@muse-player/core`'s `usePianoSampler` hook for realistic piano playback via Tone.js.
@@ -48,6 +51,15 @@ pnpm download:piano
 ```
 
 This downloads all 84 MP3 files to `samples/piano/` and regenerates `src/piano-manifest.ts`.
+
+## Related Packages
+
+| Package | Description |
+|---------|-------------|
+| [`@muse-player/core`](../core) | React hooks for score loading, MIDI playback, note highlighting, and auto-scrolling |
+| [`@muse-player/component`](../component) | UI components (PlaybackControls) styled with StyleX |
+| [`@muse-player/server`](../server) | Node.js server-side MXL rendering via Verovio WASM |
+| [`@muse-player/cli`](../cli) | CLI tool for pre-rendering MXL files to static assets |
 
 ## License
 

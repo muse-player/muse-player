@@ -2,13 +2,34 @@
   "name": "@muse-player/instruments",
   "type": "module",
   "version": "1.0.0",
-  "description": "Local instrument samples for Muse Player",
+  "description": "Piano sample manifests and audio files for Muse Player",
   "author": {
     "email": "admin@rikka.cc",
     "name": "Rikka",
     "url": "https://github.com/Muromi-Rikka"
   },
   "license": "MIT",
+  "homepage": "https://github.com/Muromi-Rikka/muse-player#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Muromi-Rikka/muse-player.git",
+    "directory": "packages/instruments"
+  },
+  "bugs": {
+    "url": "https://github.com/Muromi-Rikka/muse-player/issues"
+  },
+  "keywords": [
+    "musicxml",
+    "mxl",
+    "score",
+    "piano",
+    "samples",
+    "tone.js",
+    "audio"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
   "publishConfig": {
     "access": "public"
   },

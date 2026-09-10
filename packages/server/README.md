@@ -1,5 +1,8 @@
 # @muse-player/server
 
+[![npm version](https://img.shields.io/npm/v/@muse-player/server)](https://www.npmjs.com/package/@muse-player/server)
+[![license](https://img.shields.io/npm/l/@muse-player/server)](../../LICENSE)
+
 Node.js library for server-side MXL/MusicXML score rendering via [Verovio](https://www.verovio.org/) WASM.
 
 ## Installation
@@ -77,6 +80,15 @@ pnpm build
 ```
 
 Built with Rslib (ESM, unbundled, DTS generation, Node target).
+
+## Related Packages
+
+| Package | Description |
+|---------|-------------|
+| [`@muse-player/core`](../core) | React hooks for score loading, MIDI playback, note highlighting, and auto-scrolling |
+| [`@muse-player/component`](../component) | UI components (PlaybackControls) styled with StyleX |
+| [`@muse-player/cli`](../cli) | CLI tool for pre-rendering MXL files to static assets |
+| [`@muse-player/instruments`](../instruments) | Piano sample manifests and audio files |
 
 ## License
 

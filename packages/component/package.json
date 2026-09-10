@@ -2,13 +2,35 @@
   "name": "@muse-player/component",
   "type": "module",
   "version": "1.0.0",
-  "description": "UI components for Muse Player",
+  "description": "UI components for Muse Player, styled with StyleX",
   "author": {
     "email": "admin@rikka.cc",
     "name": "Rikka",
     "url": "https://github.com/Muromi-Rikka"
   },
   "license": "MIT",
+  "homepage": "https://github.com/Muromi-Rikka/muse-player#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Muromi-Rikka/muse-player.git",
+    "directory": "packages/component"
+  },
+  "bugs": {
+    "url": "https://github.com/Muromi-Rikka/muse-player/issues"
+  },
+  "keywords": [
+    "musicxml",
+    "mxl",
+    "score",
+    "react",
+    "ui",
+    "playback",
+    "controls",
+    "stylex"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
   "publishConfig": {
     "access": "public"
   },
