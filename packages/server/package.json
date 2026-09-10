@@ -34,7 +34,7 @@
   },
   "devDependencies": {
     "@rslib/core": "^0.23.2",
-    "@types/node": "^26.4.1",
+    "@types/node": "^26.5.0",
     "@types/verovio": "^5.1.0",
     "typescript": "^6.0.3"
   }

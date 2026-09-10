@@ -51,7 +51,7 @@
     "@stylexjs/cli": "^0.19.0",
     "@stylexjs/unplugin": "^0.19.0",
     "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.5",
+    "@types/react-dom": "^19.2.7",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "rimraf": "^6.1.3",

@@ -3,7 +3,7 @@
   "type": "module",
   "version": "1.0.0",
   "private": true,
-  "packageManager": "pnpm@11.24.0",
+  "packageManager": "pnpm@11.26.0",
   "description": "MXL/MusicXML score rendering and playback monorepo",
   "author": {
     "email": "admin@rikka.cc",
@@ -21,12 +21,12 @@
   },
   "devDependencies": {
     "@muse-player/instruments": "workspace:*",
-    "@renton/eslint-config": "^1.0.0",
-    "@renton/eslint-config-react": "^1.0.0",
+    "@renton/eslint-config": "^1.1.0",
+    "@renton/eslint-config-react": "^1.1.0",
     "cross-env": "^10.1.0",
-    "eslint": "^10.9.1",
+    "eslint": "^10.10.0",
     "husky": "^9.1.7",
-    "lint-staged": "^17.4.1",
+    "lint-staged": "^17.5.0",
     "turbo": "^2.10.12",
     "typescript": "^6.0.3"
   }
