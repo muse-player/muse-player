@@ -11,5 +11,8 @@ export type { NoteEvent, PlaybackState } from "./hooks/use-playback";
 export { useScore } from "./hooks/use-score";
 export type { ScoreData } from "./hooks/use-score";
 
+// Timeline/SVG ID canonicalization (verovio repeat expansion)
+export { canonicalizeElementAttributes, canonicalizeTimemap } from "./ids";
+
 // Shared types
 export type { ElementAttributes, ScoreDataFile, ScoreManifest, ScoreRenderResult, TimeMapEntry } from "./types";

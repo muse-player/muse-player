@@ -10,6 +10,7 @@ export interface NoteEvent {
 
 export interface PlaybackState {
   currentMeasure: number;
+  currentMeasureId: string;
   currentTime: number;
   playing: boolean;
   tempo: number;
@@ -27,6 +28,7 @@ export function usePlayback(
   const [currentTime, setCurrentTime] = useState(0);
   const [totalDuration, setTotalDuration] = useState(0);
   const [currentMeasure, setCurrentMeasure] = useState(0);
+  const [currentMeasureId, setCurrentMeasureId] = useState("");
   const [tempo, setTempo] = useState(120);
   const [notes, setNotes] = useState<NoteEvent[]>([]);
 
@@ -36,6 +38,8 @@ export function usePlayback(
   const loopReference = useRef<any>(null);
   const startedReference = useRef(false);
   const lastNotifiedNotesReference = useRef<string[]>([]);
+  const measureIndexReference = useRef(new Map<string, number>());
+  const measureStartsReference = useRef<number[]>([]);
 
   // Parse MIDI when midiBase64 changes
   useEffect(() => {
@@ -80,6 +84,20 @@ export function usePlayback(
   const onNotesUpdateReference = useRef(onNotesUpdate);
   useEffect(() => {
     timeMapReference.current = timeMap;
+
+    // Measure numbers come from `measureOn` entries; the second pass of a
+    // repeat maps back to the notated measure (first occurrence).
+    const measureIndexById = new Map<string, number>();
+    const measureStarts: number[] = [];
+    for (const entry of timeMap) {
+      if (!entry.measureOn || measureIndexById.has(entry.measureOn)) {
+        continue;
+      }
+      measureIndexById.set(entry.measureOn, measureStarts.length);
+      measureStarts.push(entry.tstamp);
+    }
+    measureIndexReference.current = measureIndexById;
+    measureStartsReference.current = measureStarts;
   }, [timeMap]);
   useEffect(() => {
     onTimeUpdateReference.current = onTimeUpdate;
@@ -122,10 +140,11 @@ export function usePlayback(
         const tm = timeMapReference.current;
         if (tm.length > 0) {
           const ms = now * 1000;
+          let measureId = "";
           let measure = 0;
           // Track active notes by processing timeMap entries up to current time
           activeNotes.clear();
-          for (const [index, element] of tm.entries()) {
+          for (const element of tm) {
             if (element.tstamp > ms) {
               break;
             }
@@ -134,17 +153,20 @@ export function usePlayback(
             const offIds = element.off ?? [];
             for (const id of onIds) activeNotes.add(id);
             for (const id of offIds) activeNotes.delete(id);
-            if (element.on && element.on!.length > 0) {
-              measure = index;
+            if (element.measureOn) {
+              measureId = element.measureOn;
+              measure = measureIndexReference.current.get(element.measureOn) ?? measure;
             }
           }
           setCurrentMeasure(measure);
+          setCurrentMeasureId(measureId);
 
-          // Only notify when NEW notes are added (not when notes end)
+          // Notify whenever the active set changes; keep the last highlight
+          // box during rests (empty set) and let stop()/seek() clear it.
           const notesArray = [...activeNotes];
           const previous = lastNotifiedNotesReference.current;
-          const hasNewNotes = notesArray.some(id => !previous.includes(id));
-          if (hasNewNotes) {
+          const hasChanged = notesArray.length !== previous.length || notesArray.some(id => !previous.includes(id));
+          if (hasChanged && notesArray.length > 0) {
             lastNotifiedNotesReference.current = notesArray;
             onNotesUpdateReference.current?.(notesArray);
           }
@@ -216,6 +238,9 @@ export function usePlayback(
     setPlaying(false);
     setCurrentTime(0);
     setCurrentMeasure(0);
+    setCurrentMeasureId("");
+    lastNotifiedNotesReference.current = [];
+    onNotesUpdateReference.current?.([]);
   }, []);
 
   const seek = useCallback((timeInSeconds: number) => {
@@ -224,16 +249,16 @@ export function usePlayback(
       return;
     Tone.getTransport().seconds = timeInSeconds;
     setCurrentTime(timeInSeconds);
+    lastNotifiedNotesReference.current = [];
+    onNotesUpdateReference.current?.([]);
   }, []);
 
   const seekToMeasure = useCallback((measureIndex: number) => {
-    if (measureIndex < 0 || measureIndex >= timeMap.length) {
+    const time = measureStartsReference.current[measureIndex];
+    if (time === undefined)
       return;
-    }
-
-    const time = timeMap[measureIndex].tstamp / 1000;
-    seek(time);
-  }, [timeMap, seek]);
+    seek(time / 1000);
+  }, [seek]);
 
   const updateTempo = useCallback((newTempo: number) => {
     setTempo(newTempo);
@@ -258,6 +283,7 @@ export function usePlayback(
 
   return {
     currentMeasure,
+    currentMeasureId,
     currentTime,
     pause,
     play,

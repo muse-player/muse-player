@@ -1,5 +1,6 @@
 import type { ScoreRenderResult } from "@muse-player/core";
 import type { VerovioOptions } from "verovio";
+import { canonicalizeTimemap } from "@muse-player/core/ids";
 import { VerovioToolkit } from "verovio/esm";
 import createVerovioModule from "verovio/wasm";
 
@@ -42,7 +43,7 @@ export async function renderScore(
 
   const midiBase64 = toolkit.renderToMIDI();
 
-  const timemap = toolkit.renderToTimemap({ includeMeasures: true });
+  const timemap = canonicalizeTimemap(toolkit.renderToTimemap({ includeMeasures: true }));
 
   const noteIds = new Set<string>();
   for (const entry of timemap) {

@@ -23,6 +23,7 @@ export interface ScoreRenderResult {
 }
 
 export interface TimeMapEntry {
+  measureOn?: string;
   off?: string[];
   on?: string[];
   qstamp: number;

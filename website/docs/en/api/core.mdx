@@ -72,7 +72,7 @@ function usePlayback(
 | `midiBase64` | `string` | Base64-encoded MIDI data from `useScore` |
 | `timeMap` | `TimeMapEntry[]` | Timemap from `useScore` |
 | `onTimeUpdate` | `(time: number) => void` | Called on each 16th-note tick with current time in seconds. Use to drive page changes via `getElementsAtTime`. |
-| `onNotesUpdate` | `(noteIds: string[]) => void` | Called when new notes are activated. Receives array of active XML note IDs. |
+| `onNotesUpdate` | `(noteIds: string[]) => void` | Called whenever the active note set changes (and is non-empty). Receives array of active XML note IDs. Clears on `stop`/`seek`. |
 | `instrument` | `{ sampler: any } \| null` | Tone.Sampler instance from `usePianoSampler`. If null, falls back to a basic PolySynth. |
 
 **Returns:**
@@ -83,11 +83,12 @@ function usePlayback(
 | `pause` | `() => void` | Pauses (preserves position) |
 | `stop` | `() => void` | Stops and resets to beginning |
 | `seek` | `(seconds: number) => void` | Jumps to absolute time |
-| `seekToMeasure` | `(index: number) => void` | Jumps to a measure by timemap index |
+| `seekToMeasure` | `(measureIndex: number) => void` | Jumps to a measure by 0-based notated measure index |
 | `playing` | `boolean` | Whether playback is active |
 | `currentTime` | `number` | Current position in seconds |
 | `totalDuration` | `number` | Total MIDI duration in seconds |
-| `currentMeasure` | `number` | Current measure index (0-indexed) |
+| `currentMeasure` | `number` | Current notated measure index (0-based; repeat passes map back) |
+| `currentMeasureId` | `string` | XML id of the current measure element (`""` if unknown) |
 | `tempo` | `number` | Current BPM (default: 120) |
 | `updateTempo` | `(bpm: number) => void` | Changes BPM in real-time |
 
@@ -131,7 +132,7 @@ Automatically scrolls the score container during playback to keep the current me
 ```ts
 function useAutoScroll(
   containerRef: React.RefObject<HTMLDivElement | null>,
-  currentMeasure: number,
+  currentMeasureId: string,
   isPlaying: boolean,
 ): AutoScrollState
 ```
@@ -141,7 +142,7 @@ function useAutoScroll(
 | Parameter | Type | Description |
 |-----------|------|-------------|
 | `containerRef` | `RefObject<HTMLDivElement>` | Ref to the scrollable score container |
-| `currentMeasure` | `number` | Current measure from `usePlayback` |
+| `currentMeasureId` | `string` | XML id of the current measure element from `usePlayback` (`""` = no-op) |
 | `isPlaying` | `boolean` | Whether playback is active |
 
 **Returns:**
@@ -205,6 +206,7 @@ interface TimeMapEntry {
   off?: string[];       // XML IDs of notes ending at this time
   on?: string[];        // XML IDs of notes starting at this time
   qstamp: number;       // Quarter-note stamp (position in score)
+  measureOn?: string;   // XML ID of the measure starting at this time
   tempo?: number;       // Tempo at this entry (BPM)
   tstamp: number;       // Absolute timestamp in milliseconds
 }

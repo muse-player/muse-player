@@ -65,12 +65,13 @@ const {
   pause,            // () => void
   stop,             // () => void
   seek,             // (seconds: number) => void
-  seekToMeasure,    // (index: number) => void
+  seekToMeasure,    // (measureIndex: number) => void
   updateTempo,      // (bpm: number) => void
   playing,          // boolean
   currentTime,      // seconds
   totalDuration,    // seconds
-  currentMeasure,   // 0-based measure index
+  currentMeasure,   // 0-based notated measure index (repeat passes map back)
+  currentMeasureId, // XML id of the current measure element ("" if unknown)
   tempo,            // current BPM
 } = usePlayback(midiBase64, timeMap, onTimeUpdate, onNotesUpdate, instrument);
 ```
@@ -90,13 +91,13 @@ usePlayback(midiBase64, timeMap, onTimeUpdate, onNotesUpdate,
 );
 ```
 
-### `useAutoScroll(containerRef, currentMeasure, isPlaying)`
+### `useAutoScroll(containerRef, currentMeasureId, isPlaying)`
 
-Auto-scrolls the score container to follow playback. Pauses on manual scroll (5s cooldown).
+Auto-scrolls the score container to follow playback, positioning the current measure element (`currentMeasureId`) in view. Pauses on manual scroll (5s cooldown).
 
 ```tsx
 const { autoScrollEnabled, setAutoScrollEnabled } = useAutoScroll(
-  containerRef, currentMeasure, playing
+  containerRef, currentMeasureId, playing
 );
 ```
 
@@ -116,6 +117,7 @@ interface TimeMapEntry {
   qstamp: number;
   on?: string[];    // note XML IDs starting at this time
   off?: string[];   // note XML IDs ending at this time
+  measureOn?: string; // XML ID of the measure starting at this time
   tempo?: number;
 }
 

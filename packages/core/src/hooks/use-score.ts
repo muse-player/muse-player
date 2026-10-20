@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import type { ScoreDataFile, ScoreManifest } from "../types";
+import { canonicalizeElementAttributes, canonicalizeTimemap } from "../ids";
 
 export interface ScoreData {
   title: string;
@@ -58,8 +59,8 @@ export function useScore() {
       setSvgPages(pages);
       setScoreData(manifest.scoreData);
       setMidiBase64(data.midiBase64);
-      setTimeMap(data.timemap);
-      setElementAttributes(data.elementAttributes);
+      setTimeMap(canonicalizeTimemap(data.timemap));
+      setElementAttributes(canonicalizeElementAttributes(data.elementAttributes));
       setPageForElementMap(pageMap);
       setCurrentPage(1);
     }

@@ -2,12 +2,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 export function useAutoScroll(
   containerReference: React.RefObject<HTMLDivElement | null>,
-  currentMeasure: number,
+  currentMeasureId: string,
   isPlaying: boolean,
 ) {
   const [autoScrollEnabled, setAutoScrollEnabled] = useState(true);
   const scrollTimeoutReference = useRef<null | ReturnType<typeof setTimeout>>(null);
-  const lastMeasureReference = useRef(-1);
+  const lastMeasureReference = useRef("");
 
   // Detect manual scroll and pause auto-scroll
   const handleScroll = useCallback(() => {
@@ -34,38 +34,26 @@ export function useAutoScroll(
     };
   }, [containerReference, handleScroll]);
 
-  // Auto-scroll when measure changes
+  // Auto-scroll when the current measure element changes
   useEffect(() => {
-    if (!isPlaying || !autoScrollEnabled || currentMeasure === lastMeasureReference.current)
+    if (!isPlaying || !autoScrollEnabled || !currentMeasureId || currentMeasureId === lastMeasureReference.current)
       return;
-    lastMeasureReference.current = currentMeasure;
+    lastMeasureReference.current = currentMeasureId;
 
     const container = containerReference.current;
     if (!container)
       return;
 
-    // Find SVG elements with measure data
-    const measureElements = container.querySelectorAll(`[data-tstamp]`);
-    if (measureElements.length === 0) {
-      // Fallback: scroll proportionally based on measure count
-      const progress = currentMeasure / Math.max(currentMeasure + 10, 1);
-      const maxScroll = container.scrollHeight - container.clientHeight;
-      container.scrollTo({
-        behavior: "smooth",
-        top: maxScroll * progress,
-      });
-      return;
-    }
-
-    // Find the element closest to the current time position
-    const targetElement = measureElements[Math.min(currentMeasure, measureElements.length - 1)];
-    if (targetElement) {
-      targetElement.scrollIntoView({
+    // `currentMeasureId` is the notated measure element id (same id space as
+    // the rendered SVG); no match means the data has no measure info.
+    const target = container.querySelector(`#${CSS.escape(currentMeasureId)}`);
+    if (target) {
+      target.scrollIntoView({
         behavior: "smooth",
         block: "center",
       });
     }
-  }, [currentMeasure, isPlaying, autoScrollEnabled, containerReference]);
+  }, [currentMeasureId, isPlaying, autoScrollEnabled, containerReference]);
 
   // Re-enable auto-scroll when playback starts
   useEffect(() => {

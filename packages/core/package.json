@@ -41,6 +41,10 @@
       "types": "./dist/src/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./ids": {
+      "types": "./dist/src/ids.d.ts",
+      "import": "./dist/ids.js"
+    },
     "./hooks/*": {
       "types": "./dist/src/hooks/*.d.ts",
       "import": "./dist/hooks/*.js"

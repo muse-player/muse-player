@@ -47,6 +47,7 @@ export default function App() {
 
   const {
     currentMeasure,
+    currentMeasureId,
     currentTime,
     pause,
     play,
@@ -58,7 +59,7 @@ export default function App() {
     updateTempo,
   } = usePlayback(midiBase64, timeMap, handleTimeUpdate, handleNotesUpdate, samplerReady ? { sampler } : null);
 
-  const { autoScrollEnabled } = useAutoScroll(containerReference, currentMeasure, playing);
+  const { autoScrollEnabled } = useAutoScroll(containerReference, currentMeasureId, playing);
 
   useNoteHighlight(
     containerReference,
