@@ -75,6 +75,10 @@ This produces a directory containing `manifest.json`, `data.json`, and SVG page 
 - **Build**: Rslib / Rsbuild + pnpm workspaces
 - **Language**: TypeScript
 
+## Releasing
+
+See [RELEASE.md](RELEASE.md) for the release process. npm publishing happens only via GitHub Actions — never publish from a local machine.
+
 ## License
 
 [MIT](LICENSE) &copy; Trapar waves
