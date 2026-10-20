@@ -1,7 +1,7 @@
 {
   "name": "@muse-player/instruments",
   "type": "module",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Piano sample manifests and audio files for Muse Player",
   "author": {
     "email": "admin@rikka.cc",
@@ -27,9 +27,6 @@
     "tone.js",
     "audio"
   ],
-  "engines": {
-    "node": ">=18"
-  },
   "publishConfig": {
     "access": "public"
   },
@@ -40,6 +37,9 @@
     "scripts",
     "src"
   ],
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "download:piano": "node --loader ts-node/esm scripts/download-piano.ts",
     "lint": "eslint . --cache"

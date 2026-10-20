@@ -1,7 +1,7 @@
 {
   "name": "@muse-player/component",
   "type": "module",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "UI components for Muse Player, styled with StyleX",
   "author": {
     "email": "admin@rikka.cc",
@@ -28,9 +28,6 @@
     "controls",
     "stylex"
   ],
-  "engines": {
-    "node": ">=18"
-  },
   "publishConfig": {
     "access": "public"
   },
@@ -46,6 +43,9 @@
   "files": [
     "dist"
   ],
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "build": "rimraf dist && rslib build && node scripts/extract-stylex.mjs",
     "dev": "rslib build --watch",
