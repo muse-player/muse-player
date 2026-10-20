@@ -16,7 +16,7 @@
     "build": "turbo build",
     "build:core": "turbo build --filter=@muse-player/core...",
     "build:demo": "turbo build --filter=demo...",
-    "lint": "turbo lint",
+    "lint": "eslint . --ignore-pattern 'packages/**' --ignore-pattern 'apps/**' --ignore-pattern 'website/**' && turbo lint",
     "postinstall": "husky"
   },
   "devDependencies": {
